@@ -1,0 +1,34 @@
+[
+  {
+    "id": "minecraft-1",
+    "name": "Survival World",
+    "type": "minecraft",
+    "host": "play.example.com",
+    "port": 25565,
+    "game": "Minecraft"
+  },
+  {
+    "id": "cs2-1",
+    "name": "Competitive Server",
+    "type": "cs2",
+    "host": "cs2.example.com",
+    "port": 27015,
+    "game": "Counter-Strike 2"
+  },
+  {
+    "id": "fivem-1",
+    "name": "FiveM RP",
+    "type": "fivem",
+    "host": "fivem.example.com",
+    "port": 30120,
+    "game": "FiveM"
+  },
+  {
+    "id": "source-1",
+    "name": "Garry's Mod",
+    "type": "garrysmod",
+    "host": "gmod.example.com",
+    "port": 27015,
+    "game": "Garry's Mod"
+  }
+]

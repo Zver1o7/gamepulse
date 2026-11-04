@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  gamepulse:
+    build: .
+    container_name: gamepulse
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
