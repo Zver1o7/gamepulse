@@ -86,6 +86,99 @@ app.delete('/admin/servers/:id', (req, res) => {
   }
 });
 
+app.put('/admin/servers/:id', express.json(), (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    servers = servers.map(s => s.id === req.params.id ? { ...s, ...req.body } : s);
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/admin/servers/:id/toggle', (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    servers = servers.map(s => s.id === req.params.id ? { ...s, enabled: s.enabled === false ? true : false } : s);
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/admin/servers/:id/test', async (req, res) => {
+  try {
+    await monitor.refreshAll();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/admin/servers/bulk/enable', (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    servers = servers.map(s => ({ ...s, enabled: true }));
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/admin/servers/bulk/disable', (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    servers = servers.map(s => ({ ...s, enabled: false }));
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/admin/refresh', async (req, res) => {
+  try {
+    await monitor.refreshAll();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/refresh', async (req, res) => {
+  try {
+    await monitor.refreshAll();
+    io.emit('servers:update', monitor.getServers());
+    io.emit('stats:update', monitor.getStats());
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/admin/import', express.json(), (req, res) => {
   const configPath = join(__dirname, '../config/servers.json');
   try {

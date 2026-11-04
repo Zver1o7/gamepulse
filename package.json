@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "1.9.0",
-  "description": "Clean professional game server monitor with admin panel, API docs, config export/import, Discord/Telegram alerts, RCON API, uptime tracking, i18n (EN/RU), PWA. By Zver1o7"
+  "version": "2.0.0",
+  "description": "Advanced game server monitor with 50+ admin functions, RCON console, groups, bulk ops, backups, API docs, Discord/Telegram alerts, uptime tracking, i18n (EN/RU), PWA. By Zver1o7"
   "main": "src/server.js",
   "type": "module",
   "scripts": {

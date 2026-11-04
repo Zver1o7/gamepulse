@@ -48,7 +48,13 @@
 - **Clean Dashboard** - Professional dark/light theme
 - **Search & Filters** - Quickly find servers by name, game, or filter by status
 - **Server Groups** - Organize servers by categories
-- **Admin Panel** - Web-based server management (add/remove/export/import)
+- **Advanced Admin Panel** - 50+ functions: add/edit/clone/delete, enable/disable, bulk operations, search/filter
+- **Server Groups** - Organize and manage servers by groups
+- **Notifications Control** - Discord/Telegram webhook configuration from admin
+- **RCON Console** - Built-in remote console in admin panel
+- **Backup & Restore** - Export/import configurations, create backups
+- **System Monitoring** - Logs viewer, system info, uptime tracking
+- **User Management** - Manage admin users and permissions
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
 - **Uptime Tracking** - Historical uptime percentage for each server
 - **Discord & Telegram Alerts** - Get notified when servers go down or come back up
@@ -58,7 +64,6 @@
 - **Multi-language** - English and Russian support
 - **REST API** - Full API access with documentation
 - **Status Badges** - Embeddable SVG badges
-- **Config Export/Import** - Backup and restore server configs
 - **Docker Ready** - One command deployment with Docker Compose
 - **Lightweight** - Minimal resource usage, perfect for VPS hosting
 
