@@ -21,7 +21,10 @@ const translations = {
     noResults: "No servers found",
     noResultsDesc: "Try adjusting your filters or search",
     madeWith: "Made with",
-    forCommunity: "for the game server community"
+    forCommunity: "for the game server community",
+    copyIP: "Copy IP",
+    copied: "Copied!",
+    installApp: "Install App"
   },
   ru: {
     title: "GamePulse - Мониторинг игровых серверов",
@@ -45,7 +48,10 @@ const translations = {
     noResults: "Серверы не найдены",
     noResultsDesc: "Попробуйте изменить фильтры или поиск",
     madeWith: "Сделано с",
-    forCommunity: "для сообщества игровых серверов"
+    forCommunity: "для сообщества игровых серверов",
+    copyIP: "Копировать IP",
+    copied: "Скопировано!",
+    installApp: "Установить приложение"
   }
 };
 

@@ -25,6 +25,14 @@ if (langLabel) {
     langLabel.textContent = currentLang.toUpperCase();
 }
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered'))
+            .catch(err => console.log('SW registration failed'));
+    });
+}
+
 function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -96,26 +104,48 @@ function renderFilteredServers(servers) {
                 </div>
             </div>
             <div class="server-metric">
-                <div class="metric-label">Status</div>
-                <div class="metric-value ${statusClass}">${statusText}</div>
+                <div class="metric-label">${t('status')}</div>
+                <div class="metric-value ${statusClass}">${isOnline ? t('online') : t('offline')}</div>
             </div>
             <div class="server-metric">
-                <div class="metric-label">Players</div>
+                <div class="metric-label">${t('players')}</div>
                 <div class="metric-value">${isOnline ? `${server.players || 0}/${server.maxPlayers || 0}` : '-'}</div>
             </div>
             <div class="server-metric">
-                <div class="metric-label">Map</div>
+                <div class="metric-label">${t('map')}</div>
                 <div class="metric-value" title="${server.map || 'N/A'}">${server.map || 'N/A'}</div>
             </div>
             <div class="server-metric">
-                <div class="metric-label">Uptime</div>
+                <div class="metric-label">${t('uptimePercent')}</div>
                 <div class="metric-value">${server.uptime !== undefined ? server.uptime + '%' : '-'}</div>
             </div>
             <div class="server-metric">
-                <div class="metric-label">Ping</div>
+                <div class="metric-label">${t('ping')}</div>
                 <div class="metric-value">${server.ping ? server.ping + 'ms' : '-'}</div>
             </div>
+            <div class="server-action">
+                <button class="copy-btn" data-ip="${server.host}:${server.port}" title="Copy IP">
+                    <i class="fas fa-copy"></i> ${t('copyIP')}
+                </button>
+            </div>
         `;
+        
+        const copyBtn = card.querySelector('.copy-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+                const ip = copyBtn.dataset.ip;
+                try {
+                    await navigator.clipboard.writeText(ip);
+                    const original = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `<i class="fas fa-check"></i> ${t('copied')}`;
+                    setTimeout(() => {
+                        copyBtn.innerHTML = original;
+                    }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            });
+        }
         
         serversGrid.appendChild(card);
     });

@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "1.3.0",
-  "description": "Real-time game server monitoring dashboard with Discord/Telegram alerts, uptime tracking, i18n (EN/RU), search & filters, themes. Track status, players, maps for Minecraft, CS2, FiveM, Source engine and more. By Zver1o7"
+  "version": "1.4.0",
+  "description": "Real-time game server monitoring dashboard with Discord/Telegram alerts, uptime tracking, i18n (EN/RU), PWA support, copy IP, search & filters, themes. Track status, players, maps for Minecraft, CS2, FiveM, Source engine and more. By Zver1o7"
   "main": "src/server.js",
   "type": "module",
   "scripts": {
