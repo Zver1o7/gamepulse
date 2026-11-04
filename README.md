@@ -2,7 +2,7 @@
 
 # GamePulse
 
-**Real-time game server monitoring dashboard with a sleek, modern interface**
+**Premium real-time game server monitoring dashboard with glassmorphism UI**
 
 *By [Zver1o7](https://github.com/Zver1o7)*
 
@@ -10,6 +10,12 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![GitHub Stars](https://img.shields.io/github/stars/Zver1o7/gamepulse?style=social)](https://github.com/Zver1o7/gamepulse)
+
+## 📸 Screenshots
+
+<div align="center">
+<img src="assets/screenshot-dark.svg" alt="GamePulse Dashboard" width="100%">
+</div>
 
 [Features](#features) • [Quick Start](#quick-start) • [Configuration](#configuration) • [Supported Games](#supported-games) • [Deployment](#deployment)
 
