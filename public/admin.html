@@ -23,10 +23,20 @@
         </header>
 
         <main class="main">
+            <section class="servers-section" style="margin-bottom: 1.5rem;">
+                <div class="section-header">
+                    <h2>Actions</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="refresh-btn" onclick="exportConfig()"><i class="fas fa-download"></i> Export</button>
+                        <button class="refresh-btn" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import</button>
+                        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importConfig(this)">
+                        <button class="refresh-btn" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Server</button>
+                    </div>
+                </div>
+            </section>
             <section class="servers-section">
                 <div class="section-header">
                     <h2>Manage Servers</h2>
-                    <button class="refresh-btn" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Server</button>
                 </div>
                 <div id="adminServers" class="servers-grid"></div>
             </section>

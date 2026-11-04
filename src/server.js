@@ -86,6 +86,18 @@ app.delete('/admin/servers/:id', (req, res) => {
   }
 });
 
+app.post('/admin/import', express.json(), (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    const servers = req.body.servers || [];
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/badge/:id.svg', (req, res) => {
   const servers = monitor.getServers();
   const server = servers.find(s => s.id === req.params.id);

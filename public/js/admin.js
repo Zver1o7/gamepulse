@@ -52,6 +52,41 @@ window.closeModal = () => {
     document.getElementById('addModal').classList.remove('active');
 };
 
+window.exportConfig = async () => {
+    const res = await fetch(`${API_BASE}/servers`, {
+        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+    });
+    const servers = await res.json();
+    const blob = new Blob([JSON.stringify(servers, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'servers.json';
+    a.click();
+};
+
+window.importConfig = async (input) => {
+    const file = input.files[0];
+    if (!file) return;
+    const text = await file.text();
+    try {
+        const servers = JSON.parse(text);
+        await fetch('/admin/import', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${ADMIN_PASSWORD}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ servers })
+        });
+        alert('Imported successfully');
+        fetchServers();
+    } catch (err) {
+        alert('Invalid file');
+    }
+    input.value = '';
+};
+
 document.getElementById('addForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = {

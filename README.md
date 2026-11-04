@@ -31,10 +31,13 @@
 **Admin Panel**
 <img src="assets/screenshot-admin.svg" alt="Admin Panel" width="100%">
 
+**API Documentation**
+<img src="assets/screenshot-docs.svg" alt="API Documentation" width="100%">
+
 </div>
 </details>
 
-[Features](#features) • [Quick Start](#quick-start) • [Configuration](#configuration) • [Supported Games](#supported-games) • [Deployment](#deployment)
+[Features](#-features) • [Quick Start](#-quick-start) • [Configuration](#️-configuration) • [Supported Games](#-supported-games) • [Deployment](#-deployment)
 
 </div>
 
@@ -45,7 +48,7 @@
 - **Clean Dashboard** - Professional dark/light theme
 - **Search & Filters** - Quickly find servers by name, game, or filter by status
 - **Server Groups** - Organize servers by categories
-- **Admin Panel** - Web-based server management (add/remove servers)
+- **Admin Panel** - Web-based server management (add/remove/export/import)
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
 - **Uptime Tracking** - Historical uptime percentage for each server
 - **Discord & Telegram Alerts** - Get notified when servers go down or come back up
@@ -53,8 +56,9 @@
 - **Copy IP** - One-click copy server addresses
 - **PWA Support** - Install as desktop/mobile app
 - **Multi-language** - English and Russian support
-- **REST API** - Access server data programmatically
+- **REST API** - Full API access with documentation
 - **Status Badges** - Embeddable SVG badges
+- **Config Export/Import** - Backup and restore server configs
 - **Docker Ready** - One command deployment with Docker Compose
 - **Lightweight** - Minimal resource usage, perfect for VPS hosting
 
