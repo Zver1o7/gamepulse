@@ -18,7 +18,7 @@
 </div>
 
 <details>
-<summary>More Screenshots</summary>
+<summary>More Screenshots - All Features</summary>
 
 <div align="center">
 
@@ -27,6 +27,9 @@
 
 **Light Theme**
 <img src="assets/screenshot-light.svg" alt="Light Theme" width="100%">
+
+**Admin Panel**
+<img src="assets/screenshot-admin.svg" alt="Admin Panel" width="100%">
 
 </div>
 </details>
@@ -39,16 +42,19 @@
 
 - **Real-time Monitoring** - Live server status updates via WebSocket every 30 seconds
 - **Multi-Game Support** - Works with Minecraft, CS2, FiveM, Garry's Mod, Source engine games, and 100+ more via [GameDig](https://github.com/gamedig/node-gamedig)
-- **Beautiful Dashboard** - Modern dark/light theme with smooth animations
+- **Clean Dashboard** - Professional dark/light theme
 - **Search & Filters** - Quickly find servers by name, game, or filter by status
 - **Server Groups** - Organize servers by categories
+- **Admin Panel** - Web-based server management (add/remove servers)
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
 - **Uptime Tracking** - Historical uptime percentage for each server
 - **Discord & Telegram Alerts** - Get notified when servers go down or come back up
-- **Player Lists** - See who's online on supported servers
-- **Map & Version Info** - Track current maps, game versions, and server details
-- **Ping Monitoring** - Latency tracking for better insights
+- **RCON Integration** - Remote console API for supported servers
+- **Copy IP** - One-click copy server addresses
+- **PWA Support** - Install as desktop/mobile app
+- **Multi-language** - English and Russian support
 - **REST API** - Access server data programmatically
+- **Status Badges** - Embeddable SVG badges
 - **Docker Ready** - One command deployment with Docker Compose
 - **Lightweight** - Minimal resource usage, perfect for VPS hosting
 

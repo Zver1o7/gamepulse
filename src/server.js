@@ -35,6 +35,57 @@ app.get('/api/history/:id', (req, res) => {
   res.json(history);
 });
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+app.use('/admin', (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (req.path === '/login') return next();
+  if (!auth || auth !== `Bearer ${ADMIN_PASSWORD}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+});
+
+app.get('/admin/servers', (req, res) => {
+  res.json(monitor.getServers());
+});
+
+app.post('/admin/servers', express.json(), (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    const newServer = {
+      id: Date.now().toString(),
+      ...req.body
+    };
+    servers.push(newServer);
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json(newServer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/admin/servers/:id', (req, res) => {
+  const configPath = join(__dirname, '../config/servers.json');
+  try {
+    let servers = [];
+    if (fs.existsSync(configPath)) {
+      servers = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+    servers = servers.filter(s => s.id !== req.params.id);
+    fs.writeFileSync(configPath, JSON.stringify(servers, null, 2));
+    monitor.loadConfig();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/badge/:id.svg', (req, res) => {
   const servers = monitor.getServers();
   const server = servers.find(s => s.id === req.params.id);

@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "1.7.0",
-  "description": "Clean, professional real-time game server monitoring dashboard with Discord/Telegram alerts, RCON API, uptime tracking, i18n (EN/RU), PWA, copy IP. Minecraft, CS2, FiveM, Source engine support. By Zver1o7"
+  "version": "1.8.0",
+  "description": "Clean professional game server monitor with admin panel, Discord/Telegram alerts, RCON API, uptime tracking, i18n (EN/RU), PWA, copy IP. By Zver1o7"
   "main": "src/server.js",
   "type": "module",
   "scripts": {
