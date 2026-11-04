@@ -19,6 +19,8 @@
 - **Multi-Game Support** - Works with Minecraft, CS2, FiveM, Garry's Mod, Source engine games, and 100+ more via [GameDig](https://github.com/gamedig/node-gamedig)
 - **Beautiful Dashboard** - Dark themed UI with smooth animations and responsive design
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
+- **Uptime Tracking** - Historical uptime percentage for each server
+- **Discord & Telegram Alerts** - Get notified when servers go down or come back up
 - **Player Lists** - See who's online on supported servers
 - **Map & Version Info** - Track current maps, game versions, and server details
 - **Ping Monitoring** - Latency tracking for better insights
@@ -67,6 +69,33 @@ Edit `config/servers.json` to add your game servers:
     "game": "Minecraft"
   }
 ]
+```
+
+### Notifications (Optional)
+
+Get alerts when servers go offline or come back online:
+
+```bash
+# Copy the example config
+cp config/notifications.example.json config/notifications.json
+```
+
+Edit `config/notifications.json`:
+
+```json
+{
+  "discord": {
+    "enabled": true,
+    "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+  },
+  "telegram": {
+    "enabled": false,
+    "botToken": "YOUR_BOT_TOKEN",
+    "chatId": "YOUR_CHAT_ID"
+  },
+  "notifyOnDown": true,
+  "notifyOnUp": true
+}
 ```
 
 ### Finding the correct `type`

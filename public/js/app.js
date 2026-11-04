@@ -67,6 +67,10 @@ function renderServers(servers) {
                 <div class="metric-value" title="${server.map || 'N/A'}">${server.map || 'N/A'}</div>
             </div>
             <div class="server-metric">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value">${server.uptime !== undefined ? server.uptime + '%' : '-'}</div>
+            </div>
+            <div class="server-metric">
                 <div class="metric-label">Ping</div>
                 <div class="metric-value">${server.ping ? server.ping + 'ms' : '-'}</div>
             </div>

@@ -1,0 +1,13 @@
+{
+  "discord": {
+    "enabled": false,
+    "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+  },
+  "telegram": {
+    "enabled": false,
+    "botToken": "YOUR_BOT_TOKEN",
+    "chatId": "YOUR_CHAT_ID"
+  },
+  "notifyOnDown": true,
+  "notifyOnUp": true
+}
