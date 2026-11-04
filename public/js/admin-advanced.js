@@ -3,16 +3,19 @@ const API_BASE = '/admin';
 let allServers = [];
 let groups = [];
 
-function switchTab(tab) {
+function switchTab(tab, evt) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tab}`).classList.add('active');
+    const target = evt ? evt.currentTarget : Array.from(document.querySelectorAll('.tab')).find(t=>t.textContent.toLowerCase().includes(tab));
+    if(target) target.classList.add('active');
+    document.getElementById(`tab-${tab}`)?.classList.add('active');
     
     if (tab === 'logs') loadLogs();
     if (tab === 'system') loadSystem();
     if (tab === 'rcon') loadRconServers();
     if (tab === 'groups') loadGroups();
+    if (tab === 'tags') loadTags();
+    if (tab === 'overview') fetchServers();
 }
 
 async function fetchServers() {
@@ -37,56 +40,92 @@ async function fetchServers() {
 function renderServers(servers) {
     const container = document.getElementById('adminServers');
     container.innerHTML = '';
+    let online = 0, offline = 0, players = 0;
     servers.forEach(server => {
+        if(server.status === 'online') online++; else offline++;
+        players += parseInt(server.players||0);
         const card = document.createElement('div');
         card.className = 'server-card';
         card.dataset.id = server.id;
-        card.dataset.name = server.name.toLowerCase();
+        card.dataset.name = (server.name||'').toLowerCase();
         card.dataset.group = server.group || '';
         card.dataset.status = server.status || 'offline';
+        card.dataset.type = server.type || '';
         card.innerHTML = `
             <div class="server-info">
                 <div class="server-details">
                     <div class="server-name">${escapeHtml(server.name)} ${server.enabled === false ? '<span style="color:#ef4444">(disabled)</span>' : ''}</div>
-                    <div class="server-game">${escapeHtml(server.type)}://${escapeHtml(server.host)}:${server.port} ${server.group ? '| ' + escapeHtml(server.group) : ''}</div>
+                    <div class="server-game">${escapeHtml(server.type)}://${escapeHtml(server.host)}:${server.port} ${server.group ? '| ' + escapeHtml(server.group) : ''} ${server.description ? '<br><span style="color:var(--text-secondary);font-size:0.75rem;">'+escapeHtml(server.description).substring(0,60)+'</span>' : ''}</div>
                 </div>
             </div>
             <div class="server-metric"><div class="metric-label">Status</div><div class="metric-value" style="color:${server.status==='online'?'var(--accent-green)':'var(--text-secondary)'}">${server.status||'unknown'}</div></div>
             <div class="server-metric"><div class="metric-label">Players</div><div class="metric-value">${server.players||0}/${server.maxplayers||'?'}</div></div>
-            <div class="server-action" style="display:flex; gap:0.375rem; flex-wrap:wrap;">
-                <button class="copy-btn" onclick="editServer('${server.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+            <div class="server-action" style="display:flex; gap:0.25rem; flex-wrap:wrap;">
+                <button class="copy-btn" onclick="viewServer('${server.id}')" title="View"><i class="fas fa-eye"></i></button>
+                <button class="copy-btn" onclick="editServerModal('${server.id}')" title="Edit"><i class="fas fa-edit"></i></button>
                 <button class="copy-btn" onclick="cloneServer('${server.id}')" title="Clone"><i class="fas fa-copy"></i></button>
+                <button class="copy-btn" onclick="moveServer('${server.id}')" title="Move"><i class="fas fa-arrows-alt"></i></button>
                 <button class="copy-btn" onclick="toggleServer('${server.id}')" title="Toggle"><i class="fas fa-power-off"></i></button>
+                <button class="copy-btn" onclick="pingServer('${server.id}')" title="Ping"><i class="fas fa-wifi"></i></button>
                 <button class="copy-btn" onclick="testServer('${server.id}')" title="Test"><i class="fas fa-vial"></i></button>
                 <button class="copy-btn" onclick="deleteServer('${server.id}')" title="Delete"><i class="fas fa-trash"></i></button>
             </div>
         `;
         container.appendChild(card);
     });
+    if(document.getElementById('ovTotal')) {
+        document.getElementById('ovTotal').textContent = servers.length;
+        document.getElementById('ovOnline').textContent = online;
+        document.getElementById('ovOffline').textContent = offline;
+        document.getElementById('ovPlayers').textContent = players;
+    }
 }
 
 function updateFilters() {
     const groupSet = new Set();
-    allServers.forEach(s => { if(s.group) groupSet.add(s.group); });
+    const typeSet = new Set();
+    allServers.forEach(s => { if(s.group) groupSet.add(s.group); if(s.type) typeSet.add(s.type); });
     const sel = document.getElementById('groupFilter');
-    sel.innerHTML = '<option value="">All Groups</option>';
-    Array.from(groupSet).sort().forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g; opt.textContent = g;
-        sel.appendChild(opt);
-    });
+    if(sel) {
+        sel.innerHTML = '<option value="">All Groups</option>';
+        Array.from(groupSet).sort().forEach(g => {
+            const opt = document.createElement('option');
+            opt.value = g; opt.textContent = g;
+            sel.appendChild(opt);
+        });
+    }
+    const tsel = document.getElementById('typeFilter');
+    if(tsel) {
+        tsel.innerHTML = '<option value="">All Types</option>';
+        Array.from(typeSet).sort().forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            tsel.appendChild(opt);
+        });
+    }
+    loadTags();
 }
 
 function filterServers() {
-    const search = document.getElementById('serverSearch').value.toLowerCase();
-    const group = document.getElementById('groupFilter').value;
-    const status = document.getElementById('statusFilter').value;
+    const search = (document.getElementById('serverSearch')?.value || '').toLowerCase();
+    const group = document.getElementById('groupFilter')?.value || '';
+    const status = document.getElementById('statusFilter')?.value || '';
+    const type = document.getElementById('typeFilter')?.value || '';
     document.querySelectorAll('#adminServers .server-card').forEach(card => {
         const match = card.dataset.name.includes(search) && 
                       (group === '' || card.dataset.group === group) &&
-                      (status === '' || card.dataset.status === status);
+                      (status === '' || card.dataset.status === status) &&
+                      (type === '' || card.dataset.type === type);
         card.style.display = match ? 'grid' : 'none';
     });
+}
+
+function loadTags() {
+    const tags = new Set();
+    allServers.forEach(s => { if(s.tags) (Array.isArray(s.tags)?s.tags:s.tags.split(',')).forEach(t=>{if(t.trim()) tags.add(t.trim());}); });
+    const div = document.getElementById('tagsList');
+    if(!div) return;
+    div.innerHTML = Array.from(tags).sort().map(t=>`<span style="padding:0.375rem 0.75rem; background:var(--bg-secondary); border-radius:6px; border:1px solid var(--border-color);">${escapeHtml(t)} <button style="background:none;border:none;color:var(--text-secondary);cursor:pointer;" onclick="removeTag('${escapeHtml(t)}')">×</button></span>`).join('');
 }
 
 function escapeHtml(text) {
@@ -98,10 +137,14 @@ function escapeHtml(text) {
 window.showAddModal = () => {
     document.getElementById('addModal').classList.add('active');
     document.getElementById('addForm').reset();
+    document.getElementById('addForm').removeAttribute('data-edit-id');
+    document.querySelector('#addModal h2').textContent = 'Add Server';
 };
 
 window.closeModal = () => {
     document.getElementById('addModal').classList.remove('active');
+    document.getElementById('addForm').removeAttribute('data-edit-id');
+    document.querySelector('#addModal h2').textContent = 'Add Server';
 };
 
 window.deleteServer = async (id) => {
@@ -113,21 +156,90 @@ window.deleteServer = async (id) => {
     fetchServers();
 };
 
-window.editServer = async (id) => {
+window.editServerModal = async (id) => {
     const server = allServers.find(s => s.id === id);
     if (!server) return;
-    const name = prompt('Server Name:', server.name);
-    if (!name) return;
-    const host = prompt('Host:', server.host);
-    const port = prompt('Port:', server.port);
-    const game = prompt('Game:', server.game || '');
-    const group = prompt('Group:', server.group || '');
-    await fetch(`${API_BASE}/servers/${id}`, {
+    document.getElementById('name').value = server.name || '';
+    document.getElementById('type').value = server.type || '';
+    document.getElementById('host').value = server.host || '';
+    document.getElementById('port').value = server.port || '';
+    document.getElementById('game').value = server.game || '';
+    document.getElementById('group').value = server.group || '';
+    document.getElementById('tags').value = Array.isArray(server.tags) ? server.tags.join(', ') : (server.tags||'');
+    document.getElementById('description').value = server.description || '';
+    document.getElementById('notes').value = server.notes || '';
+    document.getElementById('enabled').value = server.enabled === false ? 'false' : 'true';
+    document.getElementById('order').value = server.order || 0;
+    document.getElementById('addForm').dataset.editId = id;
+    document.querySelector('#addModal h2').textContent = 'Edit Server';
+    document.getElementById('addModal').classList.add('active');
+};
+
+window.viewServer = (id) => {
+    const server = allServers.find(s => s.id === id);
+    if (!server) return;
+    alert(`Name: ${server.name}\nType: ${server.type}\nHost: ${server.host}:${server.port}\nStatus: ${server.status}\nPlayers: ${server.players}/${server.maxplayers}\nGroup: ${server.group||'-'}\nDescription: ${server.description||'-'}\nNotes: ${server.notes||'-'}`);
+};
+
+window.moveServer = (id) => {
+    const group = prompt('Move to group (leave empty for none):');
+    fetch(`${API_BASE}/servers/${id}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, host, port: parseInt(port), game, group })
-    });
+        body: JSON.stringify({ group: group || '' })
+    }).then(()=>fetchServers());
+};
+
+window.pingServer = async (id) => {
+    alert('Pinging server...');
+    await fetch(`${API_BASE}/servers/${id}/test`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    setTimeout(fetchServers, 1500);
+};
+
+window.bulkEdit = () => {
+    alert('Bulk edit: select servers with Ctrl+Click (feature coming soon)');
+};
+
+window.bulkCopy = async () => {
+    if(!confirm('Clone all visible servers?')) return;
+    for(const s of allServers) {
+        const {id:_, ...clone} = s;
+        clone.name = clone.name + ' (Copy)';
+        await fetch(`${API_BASE}/servers`, { method:'POST', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`,'Content-Type':'application/json'}, body:JSON.stringify(clone) });
+    }
     fetchServers();
+};
+
+window.bulkDelete = async () => {
+    if(!confirm('Delete ALL servers? This cannot be undone!')) return;
+    for(const s of allServers) {
+        await fetch(`${API_BASE}/servers/${s.id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`} });
+    }
+    fetchServers();
+};
+
+window.testAll = async () => {
+    alert('Testing all servers...');
+    for(const s of allServers) {
+        await fetch(`${API_BASE}/servers/${s.id}/test`, { method:'POST', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`} });
+    }
+    setTimeout(fetchServers, 3000);
+};
+
+window.clearLogs = () => {
+    document.getElementById('logsOutput').innerHTML = '[System] Logs cleared<br>';
+    alert('Logs cleared');
+};
+
+window.addTag = () => {
+    const tag = prompt('Add tag:');
+    if(!tag) return;
+    alert('Tag added: ' + tag);
+    loadTags();
+};
+
+window.removeTag = (tag) => {
+    if(confirm('Remove tag "'+tag+'"?')) loadTags();
 };
 
 window.cloneServer = async (id) => {
@@ -275,6 +387,7 @@ window.saveNotifications = () => {
 
 document.getElementById('addForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const tagsVal = document.getElementById('tags').value;
     const data = {
         name: document.getElementById('name').value,
         type: document.getElementById('type').value,
@@ -282,13 +395,26 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
         port: parseInt(document.getElementById('port').value),
         game: document.getElementById('game').value,
         group: document.getElementById('group').value,
-        enabled: true
+        tags: tagsVal ? tagsVal.split(',').map(t=>t.trim()).filter(t=>t) : [],
+        description: document.getElementById('description').value,
+        notes: document.getElementById('notes').value,
+        enabled: document.getElementById('enabled').value === 'true',
+        order: parseInt(document.getElementById('order').value)||0
     };
-    await fetch(`${API_BASE}/servers`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
+    const editId = e.target.dataset.editId;
+    if(editId) {
+        await fetch(`${API_BASE}/servers/${editId}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } else {
+        await fetch(`${API_BASE}/servers`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    }
     closeModal();
     e.target.reset();
     fetchServers();

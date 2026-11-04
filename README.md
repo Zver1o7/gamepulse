@@ -18,7 +18,7 @@
 </div>
 
 <details>
-<summary>More Screenshots - All Features</summary>
+<summary>More Screenshots - All Features (20+)</summary>
 
 <div align="center">
 
@@ -28,8 +28,35 @@
 **Light Theme**
 <img src="assets/screenshot-light.svg" alt="Light Theme" width="100%">
 
-**Admin Panel**
+**Basic Admin Panel**
 <img src="assets/screenshot-admin.svg" alt="Admin Panel" width="100%">
+
+**Admin Overview Dashboard**
+<img src="assets/screenshot-admin-overview.svg" alt="Admin Overview" width="100%">
+
+**Server Edit with Description & Tags**
+<img src="assets/screenshot-admin-edit.svg" alt="Server Edit" width="100%">
+
+**RCON Console**
+<img src="assets/screenshot-admin-rcon.svg" alt="RCON Console" width="100%">
+
+**Server Groups**
+<img src="assets/screenshot-admin-groups.svg" alt="Server Groups" width="100%">
+
+**Tags Management**
+<img src="assets/screenshot-admin-tags.svg" alt="Tags" width="100%">
+
+**Backup & Restore**
+<img src="assets/screenshot-admin-backup.svg" alt="Backup" width="100%">
+
+**System Logs**
+<img src="assets/screenshot-admin-logs.svg" alt="Logs" width="100%">
+
+**System Info**
+<img src="assets/screenshot-admin-system.svg" alt="System" width="100%">
+
+**User Management**
+<img src="assets/screenshot-admin-users.svg" alt="Users" width="100%">
 
 **API Documentation**
 <img src="assets/screenshot-docs.svg" alt="API Documentation" width="100%">

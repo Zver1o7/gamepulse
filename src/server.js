@@ -59,6 +59,7 @@ app.post('/admin/servers', express.json(), (req, res) => {
     }
     const newServer = {
       id: Date.now().toString(),
+      status: 'offline',
       ...req.body
     };
     servers.push(newServer);
