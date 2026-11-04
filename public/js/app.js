@@ -1,3 +1,5 @@
+import { t, setLanguage, applyTranslations, currentLang } from './i18n.js';
+
 const socket = io();
 
 const serversGrid = document.getElementById('serversGrid');
@@ -6,6 +8,8 @@ const refreshBtn = document.getElementById('refreshBtn');
 const searchInput = document.getElementById('searchInput');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const themeToggle = document.getElementById('themeToggle');
+const langToggle = document.getElementById('langToggle');
+const langLabel = document.getElementById('langLabel');
 
 const onlineCountEl = document.getElementById('onlineCount');
 const totalPlayersEl = document.getElementById('totalPlayers');
@@ -15,6 +19,11 @@ const uptimeEl = document.getElementById('uptime');
 let allServers = [];
 let currentFilter = 'all';
 let currentSearch = '';
+
+applyTranslations();
+if (langLabel) {
+    langLabel.textContent = currentLang.toUpperCase();
+}
 
 function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
@@ -60,8 +69,10 @@ function renderFilteredServers(servers) {
     if (!servers || servers.length === 0) {
         serversGrid.innerHTML = '';
         emptyState.style.display = 'block';
-        emptyState.querySelector('h3').textContent = 'No servers found';
-        emptyState.querySelector('p').textContent = 'Try adjusting your filters or search';
+        const h3 = emptyState.querySelector('h3');
+        const p = emptyState.querySelector('p');
+        if (h3) h3.textContent = t('noResults');
+        if (p) p.textContent = t('noResultsDesc');
         return;
     }
     
@@ -112,6 +123,16 @@ function renderFilteredServers(servers) {
 
 function renderServers(servers) {
     allServers = servers || [];
+    if (allServers.length === 0) {
+        serversGrid.innerHTML = '';
+        emptyState.style.display = 'block';
+        const h3 = emptyState.querySelector('h3');
+        const p = emptyState.querySelector('p');
+        if (h3) h3.textContent = t('noServers');
+        if (p) p.textContent = t('noServersDesc');
+        return;
+    }
+    emptyState.style.display = 'none';
     applyFilters();
 }
 
@@ -149,7 +170,7 @@ if (themeToggle) {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const icon = themeToggle.querySelector('i');
-    if (savedTheme === 'light') {
+    if (savedTheme === 'light' && icon) {
         icon.classList.remove('fa-moon');
         icon.classList.add('fa-sun');
     }
@@ -160,13 +181,22 @@ if (themeToggle) {
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         
-        if (newTheme === 'light') {
+        if (newTheme === 'light' && icon) {
             icon.classList.remove('fa-moon');
             icon.classList.add('fa-sun');
-        } else {
+        } else if (icon) {
             icon.classList.remove('fa-sun');
             icon.classList.add('fa-moon');
         }
+    });
+}
+
+if (langToggle && langLabel) {
+    langToggle.addEventListener('click', () => {
+        const newLang = currentLang === 'en' ? 'ru' : 'en';
+        setLanguage(newLang);
+        langLabel.textContent = newLang.toUpperCase();
+        applyFilters();
     });
 }
 

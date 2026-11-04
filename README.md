@@ -4,6 +4,8 @@
 
 **Real-time game server monitoring dashboard with a sleek, modern interface**
 
+*By [Zver1o7](https://github.com/Zver1o7)*
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
