@@ -14,8 +14,22 @@
 ## 📸 Screenshots
 
 <div align="center">
-<img src="assets/screenshot-clean.svg" alt="GamePulse Dashboard - Clean Professional UI" width="100%">
+<img src="assets/screenshot-clean.svg" alt="GamePulse Dashboard" width="100%">
 </div>
+
+<details>
+<summary>More Screenshots</summary>
+
+<div align="center">
+
+**Search & Filters**
+<img src="assets/screenshot-filters.svg" alt="Search and Filters" width="100%">
+
+**Light Theme**
+<img src="assets/screenshot-light.svg" alt="Light Theme" width="100%">
+
+</div>
+</details>
 
 [Features](#features) • [Quick Start](#quick-start) • [Configuration](#configuration) • [Supported Games](#supported-games) • [Deployment](#deployment)
 
