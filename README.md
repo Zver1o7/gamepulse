@@ -186,12 +186,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💡 Ideas for Future
 
-- [ ] Discord webhook notifications
-- [ ] Telegram bot integration
-- [ ] Server uptime history & graphs
+- [x] Discord webhook notifications
+- [x] Telegram bot integration
+- [x] Server uptime history tracking
+- [x] Themes/customization (dark/light)
+- [x] RCON integration (API)
+- [x] Multi-language support (EN/RU)
+- [x] PWA support
+- [ ] Server uptime history & graphs (UI)
 - [ ] User authentication
-- [ ] Themes/customization
-- [ ] RCON integration
+- [ ] Advanced charts & analytics
 
 ---
 

@@ -6,7 +6,13 @@
     "host": "play.example.com",
     "port": 25565,
     "game": "Minecraft",
-    "group": "Survival"
+    "group": "Survival",
+    "rcon": {
+      "enabled": false,
+      "host": "play.example.com",
+      "port": 25575,
+      "password": "your-rcon-password"
+    }
   },
   {
     "id": "cs2-1",
