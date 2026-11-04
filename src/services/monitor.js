@@ -106,6 +106,13 @@ export class GameMonitor extends EventEmitter {
     return Math.round((online / history.length) * 100);
   }
 
+  getHistory(id) {
+    const server = this.servers.find(s => s.id === id);
+    if (!server) return [];
+    const key = server.id || `${server.host}:${server.port}`;
+    return this.history.get(key) || [];
+  }
+
   async refreshAll() {
     const results = await Promise.all(
       this.servers.map(server => this.queryServer(server))

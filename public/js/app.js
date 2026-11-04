@@ -3,11 +3,18 @@ const socket = io();
 const serversGrid = document.getElementById('serversGrid');
 const emptyState = document.getElementById('emptyState');
 const refreshBtn = document.getElementById('refreshBtn');
+const searchInput = document.getElementById('searchInput');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const themeToggle = document.getElementById('themeToggle');
 
 const onlineCountEl = document.getElementById('onlineCount');
 const totalPlayersEl = document.getElementById('totalPlayers');
 const totalCountEl = document.getElementById('totalCount');
 const uptimeEl = document.getElementById('uptime');
+
+let allServers = [];
+let currentFilter = 'all';
+let currentSearch = '';
 
 function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
@@ -28,10 +35,33 @@ function updateStats(stats) {
     uptimeEl.textContent = formatUptime(stats.uptime || 0);
 }
 
-function renderServers(servers) {
+function applyFilters() {
+    let filtered = [...allServers];
+    
+    if (currentFilter === 'online') {
+        filtered = filtered.filter(s => s.status === 'online');
+    } else if (currentFilter === 'offline') {
+        filtered = filtered.filter(s => s.status === 'offline');
+    }
+    
+    if (currentSearch) {
+        const search = currentSearch.toLowerCase();
+        filtered = filtered.filter(s => 
+            (s.name && s.name.toLowerCase().includes(search)) ||
+            (s.game && s.game.toLowerCase().includes(search)) ||
+            (s.group && s.group.toLowerCase().includes(search))
+        );
+    }
+    
+    renderFilteredServers(filtered);
+}
+
+function renderFilteredServers(servers) {
     if (!servers || servers.length === 0) {
         serversGrid.innerHTML = '';
         emptyState.style.display = 'block';
+        emptyState.querySelector('h3').textContent = 'No servers found';
+        emptyState.querySelector('p').textContent = 'Try adjusting your filters or search';
         return;
     }
     
@@ -51,7 +81,7 @@ function renderServers(servers) {
                 <div class="server-status ${statusClass}"></div>
                 <div class="server-details">
                     <div class="server-name" title="${server.name}">${server.name}</div>
-                    <div class="server-game">${server.game || server.type}</div>
+                    <div class="server-game">${server.game || server.type}${server.group ? ' • ' + server.group : ''}</div>
                 </div>
             </div>
             <div class="server-metric">
@@ -80,6 +110,11 @@ function renderServers(servers) {
     });
 }
 
+function renderServers(servers) {
+    allServers = servers || [];
+    applyFilters();
+}
+
 socket.on('servers:update', renderServers);
 socket.on('stats:update', updateStats);
 
@@ -93,6 +128,47 @@ refreshBtn.addEventListener('click', () => {
         refreshBtn.querySelector('i').classList.remove('fa-spin');
     }, 2000);
 });
+
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        currentSearch = e.target.value;
+        applyFilters();
+    });
+}
+
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        applyFilters();
+    });
+});
+
+if (themeToggle) {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const icon = themeToggle.querySelector('i');
+    if (savedTheme === 'light') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+    }
+    
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        if (newTheme === 'light') {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    });
+}
 
 fetch('/api/stats')
     .then(res => res.json())

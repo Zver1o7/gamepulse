@@ -28,6 +28,11 @@ app.get('/api/stats', (req, res) => {
   res.json(monitor.getStats());
 });
 
+app.get('/api/history/:id', (req, res) => {
+  const history = monitor.getHistory(req.params.id);
+  res.json(history);
+});
+
 io.on('connection', (socket) => {
   socket.emit('servers:update', monitor.getServers());
   socket.emit('stats:update', monitor.getStats());

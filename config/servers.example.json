@@ -5,7 +5,8 @@
     "type": "minecraft",
     "host": "play.example.com",
     "port": 25565,
-    "game": "Minecraft"
+    "game": "Minecraft",
+    "group": "Survival"
   },
   {
     "id": "cs2-1",
@@ -13,7 +14,8 @@
     "type": "cs2",
     "host": "cs2.example.com",
     "port": 27015,
-    "game": "Counter-Strike 2"
+    "game": "Counter-Strike 2",
+    "group": "Competitive"
   },
   {
     "id": "fivem-1",
@@ -21,7 +23,8 @@
     "type": "fivem",
     "host": "fivem.example.com",
     "port": 30120,
-    "game": "FiveM"
+    "game": "FiveM",
+    "group": "Roleplay"
   },
   {
     "id": "source-1",
@@ -29,6 +32,7 @@
     "type": "garrysmod",
     "host": "gmod.example.com",
     "port": 27015,
-    "game": "Garry's Mod"
+    "game": "Garry's Mod",
+    "group": "Fun"
   }
 ]

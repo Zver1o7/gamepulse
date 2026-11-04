@@ -17,13 +17,16 @@
 
 - **Real-time Monitoring** - Live server status updates via WebSocket every 30 seconds
 - **Multi-Game Support** - Works with Minecraft, CS2, FiveM, Garry's Mod, Source engine games, and 100+ more via [GameDig](https://github.com/gamedig/node-gamedig)
-- **Beautiful Dashboard** - Dark themed UI with smooth animations and responsive design
+- **Beautiful Dashboard** - Modern dark/light theme with smooth animations
+- **Search & Filters** - Quickly find servers by name, game, or filter by status
+- **Server Groups** - Organize servers by categories
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
 - **Uptime Tracking** - Historical uptime percentage for each server
 - **Discord & Telegram Alerts** - Get notified when servers go down or come back up
 - **Player Lists** - See who's online on supported servers
 - **Map & Version Info** - Track current maps, game versions, and server details
 - **Ping Monitoring** - Latency tracking for better insights
+- **REST API** - Access server data programmatically
 - **Docker Ready** - One command deployment with Docker Compose
 - **Lightweight** - Minimal resource usage, perfect for VPS hosting
 
