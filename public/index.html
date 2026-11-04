@@ -11,10 +11,16 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div class="bg-animation">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
     <div class="app">
         <header class="header">
             <div class="header-content">
@@ -113,6 +119,18 @@
                 <p><span data-i18n="madeWith">Made with</span> <i class="fas fa-heart"></i> <span data-i18n="forCommunity">for the game server community</span> • By <a href="https://github.com/Zver1o7" target="_blank">Zver1o7</a> • <a href="https://github.com/Zver1o7/gamepulse" target="_blank">GitHub</a></p>
             </div>
         </footer>
+    </div>
+
+    <div id="serverModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Server Details</h2>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="uptimeChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
