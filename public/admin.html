@@ -3,107 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GamePulse - Advanced Admin Panel</title>
+    <title>GamePulse - Admin</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0; }
-        .tab { padding: 0.75rem 1.25rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 0.875rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-        .tab.active { color: var(--text-primary); border-bottom-color: var(--accent-blue); }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: #0a0a0a; }
+        .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+        .sidebar { background: linear-gradient(180deg, #111111 0%, #0a0a0a 100%); border-right: 1px solid #1f1f1f; padding: 1.5rem 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .sidebar-header { padding: 0 1.25rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
+        .sidebar-title { font-size: 0.9375rem; font-weight: 600; color: #e5e5e5; }
+        .sidebar-subtitle { font-size: 0.75rem; color: #737373; }
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-label { padding: 0 1.25rem 0.5rem; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #525252; font-weight: 600; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1.25rem; margin: 0 0.75rem; color: #a3a3a3; text-decoration: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; transition: all 0.15s ease; border: none; background: transparent; width: calc(100% - 1.5rem); text-align: left; font-family: inherit; }
+        .nav-item:hover { background: #161616; color: #e5e5e5; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, transparent 100%); color: #e5e5e5; border-left: 2px solid #3b82f6; padding-left: 1.125rem; }
+        .nav-item i { width: 18px; text-align: center; font-size: 0.875rem; }
+        .main-content { background: #0a0a0a; }
+        .topbar { background: rgba(17, 17, 17, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #1f1f1f; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-title { font-size: 1.125rem; font-weight: 600; color: #e5e5e5; }
+        .topbar-actions { display: flex; gap: 0.5rem; }
+        .btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.875rem; background: #161616; border: 1px solid #262626; color: #e5e5e5; border-radius: 8px; cursor: pointer; font-size: 0.8125rem; font-family: inherit; text-decoration: none; transition: all 0.15s ease; }
+        .btn:hover { background: #1f1f1f; border-color: #333; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-color: #3b82f6; color: white; }
+        .btn-primary:hover { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-color: #2563eb; }
+        .content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 0.75rem; }
-        .form-label { font-size: 0.8125rem; color: var(--text-secondary); }
-        .form-input { padding: 0.5rem; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.875rem; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: linear-gradient(180deg, #111111 0%, #0f0f0f 100%); border: 1px solid #1f1f1f; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
+        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #1f1f1f; display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 0.9375rem; font-weight: 600; color: #e5e5e5; }
+        .card-body { padding: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .stat-card { background: linear-gradient(180deg, #111111 0%, #0f0f0f 100%); border: 1px solid #1f1f1f; border-radius: 12px; padding: 1.25rem; }
+        .stat-label { font-size: 0.8125rem; color: #737373; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 1.875rem; font-weight: 600; color: #e5e5e5; }
+        .stat-value.green { color: #22c55e; }
+        .stat-value.red { color: #ef4444; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .form-label { font-size: 0.8125rem; color: #a3a3a3; font-weight: 500; }
+        .form-input { padding: 0.625rem 0.875rem; background: #0a0a0a; color: #e5e5e5; border: 1px solid #262626; border-radius: 8px; font-family: inherit; font-size: 0.875rem; transition: all 0.15s ease; }
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .table { width: 100%; }
+        .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; color: #737373; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1f1f1f; }
+        .table td { padding: 1rem; border-bottom: 1px solid #161616; color: #e5e5e5; font-size: 0.875rem; }
+        .table tr:hover { background: #111111; }
+        .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; }
+        .badge-green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .badge-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .badge-gray { background: rgba(115, 115, 115, 0.1); color: #a3a3a3; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 100; }
+        .modal.active { display: flex; }
+        .modal-content { background: linear-gradient(180deg, #111111 0%, #0f0f0f 100%); border: 1px solid #262626; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #1f1f1f; display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 1.5rem; }
+        .modal-close { background: transparent; border: none; color: #737373; cursor: pointer; font-size: 1.25rem; }
+        .console { background: #000000; border: 1px solid #1f1f1f; border-radius: 8px; padding: 1rem; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.8125rem; color: #22c55e; max-height: 400px; overflow-y: auto; line-height: 1.6; }
     </style>
 </head>
 <body>
-    <div class="app">
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-shield-alt"></i>
-                    <h1>GamePulse Advanced Admin</h1>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-bolt"></i>
                 </div>
-                <div class="header-actions">
-                    <a href="/docs.html" class="refresh-btn"><i class="fas fa-book"></i> API Docs</a>
-                    <a href="/" class="refresh-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <div>
+                    <div class="sidebar-title">GamePulse</div>
+                    <div class="sidebar-subtitle">Admin Panel</div>
                 </div>
             </div>
-        </header>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-label">Main</div>
+                    <button class="nav-item active" onclick="switchTab('overview', event)"><i class="fas fa-chart-pie"></i> Overview</button>
+                    <button class="nav-item" onclick="switchTab('servers', event)"><i class="fas fa-server"></i> Servers</button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-label">Management</div>
+                    <button class="nav-item" onclick="switchTab('groups', event)"><i class="fas fa-layer-group"></i> Groups</button>
+                    <button class="nav-item" onclick="switchTab('tags', event)"><i class="fas fa-tags"></i> Tags</button>
+                    <button class="nav-item" onclick="switchTab('users', event)"><i class="fas fa-users"></i> Users</button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-label">Control</div>
+                    <button class="nav-item" onclick="switchTab('rcon', event)"><i class="fas fa-terminal"></i> RCON Console</button>
+                    <button class="nav-item" onclick="switchTab('notifications', event)"><i class="fas fa-bell"></i> Notifications</button>
+                    <button class="nav-item" onclick="switchTab('monitor', event)"><i class="fas fa-heartbeat"></i> Monitor</button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    <button class="nav-item" onclick="switchTab('backup', event)"><i class="fas fa-database"></i> Backup & Restore</button>
+                    <button class="nav-item" onclick="switchTab('logs', event)"><i class="fas fa-file-alt"></i> Logs</button>
+                    <button class="nav-item" onclick="switchTab('api', event)"><i class="fas fa-code"></i> API</button>
+                    <button class="nav-item" onclick="switchTab('plugins', event)"><i class="fas fa-puzzle-piece"></i> Plugins</button>
+                    <button class="nav-item" onclick="switchTab('system', event)"><i class="fas fa-cog"></i> Settings</button>
+                    <button class="nav-item" onclick="switchTab('themes', event)"><i class="fas fa-palette"></i> Appearance</button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-label">Links</div>
+                    <a href="/" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="/docs.html" class="nav-item"><i class="fas fa-book"></i> API Docs</a>
+                </div>
+            </nav>
+        </aside>
 
-        <main class="main">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('servers', event)"><i class="fas fa-server"></i> Servers</button>
-                <button class="tab" onclick="switchTab('overview', event)"><i class="fas fa-chart-line"></i> Overview</button>
-                <button class="tab" onclick="switchTab('groups', event)"><i class="fas fa-layer-group"></i> Groups</button>
-                <button class="tab" onclick="switchTab('tags', event)"><i class="fas fa-tags"></i> Tags</button>
-                <button class="tab" onclick="switchTab('notifications', event)"><i class="fas fa-bell"></i> Notifications</button>
-                <button class="tab" onclick="switchTab('rcon', event)"><i class="fas fa-terminal"></i> RCON</button>
-                <button class="tab" onclick="switchTab('monitor', event)"><i class="fas fa-heartbeat"></i> Monitor</button>
-                <button class="tab" onclick="switchTab('backup', event)"><i class="fas fa-database"></i> Backup</button>
-                <button class="tab" onclick="switchTab('logs', event)"><i class="fas fa-file-alt"></i> Logs</button>
-                <button class="tab" onclick="switchTab('plugins', event)"><i class="fas fa-puzzle-piece"></i> Plugins</button>
-                <button class="tab" onclick="switchTab('api', event)"><i class="fas fa-code"></i> API</button>
-                <button class="tab" onclick="switchTab('system', event)"><i class="fas fa-cog"></i> System</button>
-                <button class="tab" onclick="switchTab('users', event)"><i class="fas fa-users"></i> Users</button>
-                <button class="tab" onclick="switchTab('themes', event)"><i class="fas fa-palette"></i> Themes</button>
-            </div>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-title" id="pageTitle">Overview</div>
+                <div class="topbar-actions">
+                    <button class="btn" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <button class="btn btn-primary" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Server</button>
+                </div>
+            </header>
+
+            <div class="content">
 
             <!-- Overview Tab -->
-            <div id="tab-overview" class="tab-content">
-                <div class="grid-2">
-                    <section class="servers-section">
-                        <div class="section-header"><h2>Quick Stats</h2></div>
-                        <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 6px; text-align: center;"><div style="color: var(--text-secondary); font-size: 0.8125rem;">Total Servers</div><div style="font-size: 1.75rem; font-weight: 600; margin-top: 0.5rem;" id="ovTotal">0</div></div>
-                            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 6px; text-align: center;"><div style="color: var(--text-secondary); font-size: 0.8125rem;">Online</div><div style="font-size: 1.75rem; font-weight: 600; margin-top: 0.5rem; color: var(--accent-green);" id="ovOnline">0</div></div>
-                            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 6px; text-align: center;"><div style="color: var(--text-secondary); font-size: 0.8125rem;">Offline</div><div style="font-size: 1.75rem; font-weight: 600; margin-top: 0.5rem; color: #ef4444;" id="ovOffline">0</div></div>
-                            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 6px; text-align: center;"><div style="color: var(--text-secondary); font-size: 0.8125rem;">Players</div><div style="font-size: 1.75rem; font-weight: 600; margin-top: 0.5rem;" id="ovPlayers">0</div></div>
+            <div id="tab-overview" class="tab-content active">
+                <div class="grid-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Servers</div>
+                        <div class="stat-value" id="ovTotal">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Online</div>
+                        <div class="stat-value green" id="ovOnline">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Offline</div>
+                        <div class="stat-value red" id="ovOffline">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Players</div>
+                        <div class="stat-value" id="ovPlayers">0</div>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1.5rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Quick Actions</div>
                         </div>
-                    </section>
-                    <section class="servers-section">
-                        <div class="section-header"><h2>Quick Actions</h2></div>
-                        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                            <button class="refresh-btn" onclick="refreshAll()"><i class="fas fa-sync"></i> Force Refresh All</button>
-                            <button class="refresh-btn" onclick="bulkEnable()"><i class="fas fa-play"></i> Enable All Servers</button>
-                            <button class="refresh-btn" onclick="bulkDisable()"><i class="fas fa-stop"></i> Disable All Servers</button>
-                            <button class="refresh-btn" onclick="exportConfig()"><i class="fas fa-file-export"></i> Export Full Config</button>
-                            <button class="refresh-btn" onclick="clearLogs()"><i class="fas fa-eraser"></i> Clear Logs</button>
-                            <button class="refresh-btn" onclick="testAll()"><i class="fas fa-vial"></i> Test All Connections</button>
+                        <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="btn" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Force Refresh All</button>
+                            <button class="btn" onclick="bulkEnable()"><i class="fas fa-check-circle"></i> Enable All Servers</button>
+                            <button class="btn" onclick="bulkDisable()"><i class="fas fa-ban"></i> Disable All Servers</button>
+                            <button class="btn" onclick="exportConfig()"><i class="fas fa-file-export"></i> Export Full Config</button>
+                            <button class="btn" onclick="testAll()"><i class="fas fa-vial"></i> Test All Connections</button>
+                            <button class="btn" onclick="clearLogs()"><i class="fas fa-eraser"></i> Clear Logs</button>
                         </div>
-                    </section>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">System Status</div>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 0.875rem;">
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">Monitoring</span><span class="badge badge-green">Active</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">WebSocket</span><span class="badge badge-green">Connected</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">Uptime</span><span style="color: #e5e5e5; font-size: 0.875rem;">Running</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Servers Tab -->
-            <div id="tab-servers" class="tab-content active">
-                <section class="servers-section" style="margin-bottom: 1rem;">
-                    <div class="section-header">
-                        <h2>Server Management</h2>
+            <div id="tab-servers" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Server List</div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button class="refresh-btn" onclick="showAddModal()"><i class="fas fa-plus"></i> Add</button>
-                            <button class="refresh-btn" onclick="bulkEdit()"><i class="fas fa-edit"></i> Bulk Edit</button>
-                            <button class="refresh-btn" onclick="bulkCopy()"><i class="fas fa-copy"></i> Bulk Clone</button>
-                            <button class="refresh-btn" onclick="bulkEnable()"><i class="fas fa-check-circle"></i> Enable</button>
-                            <button class="refresh-btn" onclick="bulkDisable()"><i class="fas fa-ban"></i> Disable</button>
-                            <button class="refresh-btn" onclick="bulkDelete()"><i class="fas fa-trash"></i> Delete</button>
-                            <button class="refresh-btn" onclick="refreshAll()"><i class="fas fa-sync"></i> Refresh</button>
-                            <button class="refresh-btn" onclick="exportConfig()"><i class="fas fa-download"></i> Export</button>
-                            <button class="refresh-btn" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import</button>
+                            <button class="btn" onclick="bulkEdit()"><i class="fas fa-edit"></i> Bulk Edit</button>
+                            <button class="btn" onclick="bulkCopy()"><i class="fas fa-copy"></i> Clone All</button>
+                            <button class="btn" onclick="bulkEnable()"><i class="fas fa-check"></i> Enable</button>
+                            <button class="btn" onclick="bulkDisable()"><i class="fas fa-ban"></i> Disable</button>
+                            <button class="btn" onclick="bulkDelete()"><i class="fas fa-trash"></i> Delete</button>
+                            <button class="btn" onclick="exportConfig()"><i class="fas fa-download"></i> Export</button>
+                            <button class="btn" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import</button>
                             <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importConfig(this)">
                         </div>
                     </div>
-                    <div style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <input type="text" id="serverSearch" class="form-input" style="flex: 1; min-width: 200px;" placeholder="Search by name, host, game..." onkeyup="filterServers()">
-                        <select id="groupFilter" class="form-input" onchange="filterServers()"><option value="">All Groups</option></select>
-                        <select id="statusFilter" class="form-input" onchange="filterServers()"><option value="">All Status</option><option value="online">Online</option><option value="offline">Offline</option></select>
-                        <select id="typeFilter" class="form-input" onchange="filterServers()"><option value="">All Types</option></select>
+                    <div style="padding: 1rem 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; border-bottom: 1px solid #1f1f1f;">
+                        <input type="text" id="serverSearch" class="form-input" style="flex: 1; min-width: 250px;" placeholder="Search servers..." onkeyup="filterServers()">
+                        <select id="groupFilter" class="form-input" style="width: 180px;" onchange="filterServers()"><option value="">All Groups</option></select>
+                        <select id="statusFilter" class="form-input" style="width: 150px;" onchange="filterServers()"><option value="">All Status</option><option value="online">Online</option><option value="offline">Offline</option></select>
+                        <select id="typeFilter" class="form-input" style="width: 150px;" onchange="filterServers()"><option value="">All Types</option></select>
                     </div>
-                    <div id="adminServers" class="servers-grid"></div>
-                </section>
+                    <div style="padding: 1.5rem;">
+                        <div id="adminServers" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Tags Tab -->
@@ -300,33 +395,40 @@
     </div>
 
     <div id="addModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header"><h2>Add/Edit Server</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="font-size: 1rem; font-weight: 600; color: #e5e5e5;">Add Server</div>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
             <div class="modal-body">
-                <form id="addForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <form id="addForm">
                     <div class="form-group"><label class="form-label">Server Name *</label><input type="text" id="name" class="form-input" required></div>
-                    <div class="grid-2">
+                    <div class="grid-2" style="gap: 1rem;">
                         <div class="form-group"><label class="form-label">Game Type *</label><input type="text" id="type" class="form-input" placeholder="minecraft, cs2, fivem" required></div>
                         <div class="form-group"><label class="form-label">Game Name</label><input type="text" id="game" class="form-input"></div>
                     </div>
-                    <div class="grid-2">
+                    <div class="grid-2" style="gap: 1rem;">
                         <div class="form-group"><label class="form-label">Host/IP *</label><input type="text" id="host" class="form-input" required></div>
                         <div class="form-group"><label class="form-label">Port *</label><input type="number" id="port" class="form-input" required></div>
                     </div>
-                    <div class="grid-2">
+                    <div class="grid-2" style="gap: 1rem;">
                         <div class="form-group"><label class="form-label">Group</label><input type="text" id="group" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">Tags (comma separated)</label><input type="text" id="tags" class="form-input" placeholder="pvp, survial"></div>
+                        <div class="form-group"><label class="form-label">Tags</label><input type="text" id="tags" class="form-input" placeholder="pvp, survival"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">Description</label><textarea id="description" class="form-input" rows="3" placeholder="Server description..."></textarea></div>
-                    <div class="form-group"><label class="form-label">Notes</label><textarea id="notes" class="form-input" rows="2" placeholder="Internal notes..."></textarea></div>
-                    <div class="grid-2">
+                    <div class="form-group"><label class="form-label">Description</label><textarea id="description" class="form-input" rows="3" placeholder="Public description..."></textarea></div>
+                    <div class="form-group"><label class="form-label">Internal Notes</label><textarea id="notes" class="form-input" rows="2" placeholder="Admin notes..."></textarea></div>
+                    <div class="grid-2" style="gap: 1rem;">
                         <div class="form-group"><label class="form-label">Enabled</label><select id="enabled" class="form-input"><option value="true">Yes</option><option value="false">No</option></select></div>
-                        <div class="form-group"><label class="form-label">Order</label><input type="number" id="order" class="form-input" value="0"></div>
+                        <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="order" class="form-input" value="0"></div>
                     </div>
-                    <button type="submit" class="refresh-btn">Save Server</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;"><i class="fas fa-save"></i> Save Server</button>
                 </form>
             </div>
         </div>
+    </div>
+
+            </div>
+        </main>
     </div>
 
     <script src="js/admin-advanced.js"></script>

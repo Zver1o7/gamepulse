@@ -4,11 +4,28 @@ let allServers = [];
 let groups = [];
 
 function switchTab(tab, evt) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-    const target = evt ? evt.currentTarget : Array.from(document.querySelectorAll('.tab')).find(t=>t.textContent.toLowerCase().includes(tab));
-    if(target) target.classList.add('active');
+    if(evt && evt.currentTarget) evt.currentTarget.classList.add('active');
     document.getElementById(`tab-${tab}`)?.classList.add('active');
+    
+    const titles = {
+        overview: 'Overview',
+        servers: 'Servers',
+        groups: 'Groups',
+        tags: 'Tags',
+        users: 'Users',
+        rcon: 'RCON Console',
+        notifications: 'Notifications',
+        monitor: 'Monitor',
+        backup: 'Backup & Restore',
+        logs: 'Logs',
+        api: 'API',
+        plugins: 'Plugins',
+        system: 'Settings',
+        themes: 'Appearance'
+    };
+    document.getElementById('pageTitle').textContent = titles[tab] || tab;
     
     if (tab === 'logs') loadLogs();
     if (tab === 'system') loadSystem();
@@ -45,30 +62,36 @@ function renderServers(servers) {
         if(server.status === 'online') online++; else offline++;
         players += parseInt(server.players||0);
         const card = document.createElement('div');
-        card.className = 'server-card';
+        card.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: center; padding: 1rem 1.25rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 10px; transition: all 0.15s ease;';
+        card.onmouseover = () => { card.style.borderColor = '#262626'; card.style.background = '#0f0f0f'; };
+        card.onmouseout = () => { card.style.borderColor = '#1f1f1f'; card.style.background = '#0a0a0a'; };
         card.dataset.id = server.id;
         card.dataset.name = (server.name||'').toLowerCase();
         card.dataset.group = server.group || '';
         card.dataset.status = server.status || 'offline';
         card.dataset.type = server.type || '';
         card.innerHTML = `
-            <div class="server-info">
-                <div class="server-details">
-                    <div class="server-name">${escapeHtml(server.name)} ${server.enabled === false ? '<span style="color:#ef4444">(disabled)</span>' : ''}</div>
-                    <div class="server-game">${escapeHtml(server.type)}://${escapeHtml(server.host)}:${server.port} ${server.group ? '| ' + escapeHtml(server.group) : ''} ${server.description ? '<br><span style="color:var(--text-secondary);font-size:0.75rem;">'+escapeHtml(server.description).substring(0,60)+'</span>' : ''}</div>
+            <div style="display: flex; align-items: center; gap: 0.875rem; min-width: 0;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                    <div style="color: #e5e5e5; font-weight: 500; font-size: 0.875rem; margin-bottom: 0.25rem;">${escapeHtml(server.name)} ${server.enabled === false ? '<span style="color:#ef4444; font-size:0.75rem;">(disabled)</span>' : ''}</div>
+                    <div style="color: #737373; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(server.type)} • ${escapeHtml(server.host)}:${server.port}${server.group ? ' • ' + escapeHtml(server.group) : ''}</div>
+                    ${server.description ? '<div style="color: #525252; font-size: 0.75rem; margin-top: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">'+escapeHtml(server.description)+'</div>' : ''}
                 </div>
             </div>
-            <div class="server-metric"><div class="metric-label">Status</div><div class="metric-value" style="color:${server.status==='online'?'var(--accent-green)':'var(--text-secondary)'}">${server.status||'unknown'}</div></div>
-            <div class="server-metric"><div class="metric-label">Players</div><div class="metric-value">${server.players||0}/${server.maxplayers||'?'}</div></div>
-            <div class="server-action" style="display:flex; gap:0.25rem; flex-wrap:wrap;">
-                <button class="copy-btn" onclick="viewServer('${server.id}')" title="View"><i class="fas fa-eye"></i></button>
-                <button class="copy-btn" onclick="editServerModal('${server.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                <button class="copy-btn" onclick="cloneServer('${server.id}')" title="Clone"><i class="fas fa-copy"></i></button>
-                <button class="copy-btn" onclick="moveServer('${server.id}')" title="Move"><i class="fas fa-arrows-alt"></i></button>
-                <button class="copy-btn" onclick="toggleServer('${server.id}')" title="Toggle"><i class="fas fa-power-off"></i></button>
-                <button class="copy-btn" onclick="pingServer('${server.id}')" title="Ping"><i class="fas fa-wifi"></i></button>
-                <button class="copy-btn" onclick="testServer('${server.id}')" title="Test"><i class="fas fa-vial"></i></button>
-                <button class="copy-btn" onclick="deleteServer('${server.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+            <div>
+                <span class="badge ${server.status==='online'?'badge-green':'badge-red'}">${server.status||'unknown'}</span>
+            </div>
+            <div style="color: #e5e5e5; font-size: 0.875rem;">${server.players||0} / ${server.maxplayers||'?'}</div>
+            <div style="display: flex; gap: 0.375rem;">
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="viewServer('${server.id}')" title="View"><i class="fas fa-eye"></i></button>
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="editServerModal('${server.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="cloneServer('${server.id}')" title="Clone"><i class="fas fa-copy"></i></button>
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="toggleServer('${server.id}')" title="Toggle"><i class="fas fa-power-off"></i></button>
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="testServer('${server.id}')" title="Test"><i class="fas fa-vial"></i></button>
+                <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="deleteServer('${server.id}')" title="Delete"><i class="fas fa-trash"></i></button>
             </div>
         `;
         container.appendChild(card);
@@ -138,13 +161,15 @@ window.showAddModal = () => {
     document.getElementById('addModal').classList.add('active');
     document.getElementById('addForm').reset();
     document.getElementById('addForm').removeAttribute('data-edit-id');
-    document.querySelector('#addModal h2').textContent = 'Add Server';
+    document.getElementById('enabled').value = 'true';
+    document.getElementById('order').value = '0';
+    document.querySelector('#addModal .modal-header div').textContent = 'Add Server';
 };
 
 window.closeModal = () => {
     document.getElementById('addModal').classList.remove('active');
     document.getElementById('addForm').removeAttribute('data-edit-id');
-    document.querySelector('#addModal h2').textContent = 'Add Server';
+    document.querySelector('#addModal .modal-header div').textContent = 'Add Server';
 };
 
 window.deleteServer = async (id) => {
@@ -171,7 +196,7 @@ window.editServerModal = async (id) => {
     document.getElementById('enabled').value = server.enabled === false ? 'false' : 'true';
     document.getElementById('order').value = server.order || 0;
     document.getElementById('addForm').dataset.editId = id;
-    document.querySelector('#addModal h2').textContent = 'Edit Server';
+    document.querySelector('#addModal .modal-header div').textContent = 'Edit Server';
     document.getElementById('addModal').classList.add('active');
 };
 
