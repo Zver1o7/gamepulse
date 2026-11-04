@@ -2,7 +2,7 @@
 
 # GamePulse
 
-**Premium real-time game server monitoring dashboard with glassmorphism UI**
+**Clean, professional real-time game server monitoring dashboard**
 
 *By [Zver1o7](https://github.com/Zver1o7)*
 
@@ -14,7 +14,7 @@
 ## 📸 Screenshots
 
 <div align="center">
-<img src="assets/screenshot-dark.svg" alt="GamePulse Dashboard" width="100%">
+<img src="assets/screenshot-clean.svg" alt="GamePulse Dashboard - Clean Professional UI" width="100%">
 </div>
 
 [Features](#features) • [Quick Start](#quick-start) • [Configuration](#configuration) • [Supported Games](#supported-games) • [Deployment](#deployment)

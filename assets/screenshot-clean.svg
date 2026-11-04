@@ -1,0 +1,91 @@
+<svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="900" fill="#0f0f0f"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1400" height="56" fill="#161616" stroke="#2a2a2a"/>
+  <text x="32" y="35" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="15" font-weight="600" fill="#e5e5e5">GamePulse</text>
+  <rect x="1240" y="16" width="70" height="24" rx="6" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <text x="1275" y="31" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#e5e5e5" text-anchor="middle">Refresh</text>
+  
+  <!-- Stats -->
+  <rect x="32" y="88" width="325" height="72" rx="8" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <circle cx="56" cy="124" r="12" fill="#22c55e" opacity="0.15"/>
+  <text x="56" y="129" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="10" fill="#22c55e" text-anchor="middle">●</text>
+  <text x="88" y="118" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="22" font-weight="600" fill="#e5e5e5">2</text>
+  <text x="88" y="138" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Online</text>
+  
+  <rect x="377" y="88" width="325" height="72" rx="8" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <circle cx="401" cy="124" r="12" fill="#3b82f6" opacity="0.15"/>
+  <text x="401" y="129" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="10" fill="#3b82f6" text-anchor="middle">👥</text>
+  <text x="433" y="118" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="22" font-weight="600" fill="#e5e5e5">42</text>
+  <text x="433" y="138" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Total Players</text>
+  
+  <rect x="722" y="88" width="325" height="72" rx="8" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <circle cx="746" cy="124" r="12" fill="#a3a3a3" opacity="0.15"/>
+  <text x="746" y="129" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="10" fill="#a3a3a3" text-anchor="middle">▦</text>
+  <text x="778" y="118" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="22" font-weight="600" fill="#e5e5e5">4</text>
+  <text x="778" y="138" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Total Servers</text>
+  
+  <rect x="1067" y="88" width="301" height="72" rx="8" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <circle cx="1091" cy="124" r="12" fill="#f59e0b" opacity="0.15"/>
+  <text x="1091" y="129" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle">⏱</text>
+  <text x="1123" y="118" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="22" font-weight="600" fill="#e5e5e5">2h 34m</text>
+  <text x="1123" y="138" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Uptime</text>
+  
+  <!-- Controls -->
+  <rect x="32" y="192" width="800" height="36" rx="6" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <text x="52" y="214" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#737373">Search servers...</text>
+  <rect x="860" y="192" width="180" height="36" rx="6" fill="#161616" stroke="#2a2a2a"/>
+  <text x="890" y="214" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#e5e5e5">All</text>
+  <text x="940" y="214" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Online</text>
+  <text x="1000" y="214" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#a3a3a3">Offline</text>
+  
+  <!-- Servers -->
+  <rect x="32" y="260" width="1336" height="580" rx="8" fill="#1f1f1f" stroke="#2a2a2a"/>
+  <rect x="32" y="260" width="1336" height="48" fill="#161616"/>
+  <text x="52" y="288" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="13" font-weight="500" fill="#e5e5e5">Servers</text>
+  <circle cx="110" cy="284" r="3" fill="#22c55e"/>
+  <text x="118" y="288" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#22c55e">Live</text>
+  
+  <!-- Server Row 1 -->
+  <rect x="32" y="308" width="1336" height="64" fill="#1f1f1f"/>
+  <line x1="32" y1="372" x2="1368" y2="372" stroke="#2a2a2a"/>
+  <circle cx="52" cy="340" r="4" fill="#22c55e"/>
+  <text x="72" y="335" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="13" font-weight="500" fill="#e5e5e5">Survival World</text>
+  <text x="72" y="350" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#737373">Minecraft • Survival</text>
+  <text x="450" y="340" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#22c55e">Online</text>
+  <text x="580" y="340" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">12/20</text>
+  <text x="710" y="340" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">world</text>
+  <text x="840" y="340" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">98%</text>
+  <text x="970" y="340" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">24ms</text>
+  <rect x="1260" y="328" width="80" height="24" rx="6" fill="#161616" stroke="#2a2a2a"/>
+  <text x="1300" y="343" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#e5e5e5" text-anchor="middle">Copy IP</text>
+  
+  <!-- Server Row 2 -->
+  <rect x="32" y="372" width="1336" height="64" fill="#1f1f1f"/>
+  <line x1="32" y1="436" x2="1368" y2="436" stroke="#2a2a2a"/>
+  <circle cx="52" cy="404" r="4" fill="#22c55e"/>
+  <text x="72" y="399" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="13" font-weight="500" fill="#e5e5e5">Competitive Server</text>
+  <text x="72" y="414" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#737373">Counter-Strike 2 • Competitive</text>
+  <text x="450" y="404" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#22c55e">Online</text>
+  <text x="580" y="404" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">8/10</text>
+  <text x="710" y="404" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">de_dust2</text>
+  <text x="840" y="404" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">100%</text>
+  <text x="970" y="404" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#e5e5e5">18ms</text>
+  <rect x="1260" y="392" width="80" height="24" rx="6" fill="#161616" stroke="#2a2a2a"/>
+  <text x="1300" y="407" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#e5e5e5" text-anchor="middle">Copy IP</text>
+  
+  <!-- Server Row 3 -->
+  <rect x="32" y="436" width="1336" height="64" fill="#1f1f1f"/>
+  <line x1="32" y1="500" x2="1368" y2="500" stroke="#2a2a2a"/>
+  <circle cx="52" cy="468" r="4" fill="#ef4444"/>
+  <text x="72" y="463" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="13" font-weight="500" fill="#e5e5e5">FiveM RP</text>
+  <text x="72" y="478" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#737373">FiveM • Roleplay</text>
+  <text x="450" y="468" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#ef4444">Offline</text>
+  <text x="580" y="468" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#737373">-/-</text>
+  <text x="710" y="468" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#737373">N/A</text>
+  <text x="840" y="468" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#737373">0%</text>
+  <text x="970" y="468" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="12" fill="#737373">-</text>
+  <rect x="1260" y="456" width="80" height="24" rx="6" fill="#161616" stroke="#2a2a2a"/>
+  <text x="1300" y="471" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="11" fill="#e5e5e5" text-anchor="middle">Copy IP</text>
+</svg>
