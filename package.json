@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "2.4.0",
-  "description": "Mega update: analytics, templates, alert rules, maintenance, audit log, status pages, webhooks, modern admin, RCON console, 150+ functions. By Zver1o7"
+  "version": "2.5.0",
+  "description": "Mega update: analytics, reports, templates, alert rules, maintenance, audit log, status pages, webhooks, integrations, modern admin, RCON console, 170+ functions. By Zver1o7"
   "main": "src/server.js",
   "type": "module",
   "scripts": {

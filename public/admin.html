@@ -83,6 +83,7 @@
                     <div class="nav-label">Main</div>
                     <button class="nav-item active" onclick="switchTab('overview', event)"><i class="fas fa-chart-pie"></i> Overview</button>
                     <button class="nav-item" onclick="switchTab('analytics', event)"><i class="fas fa-chart-bar"></i> Analytics</button>
+                    <button class="nav-item" onclick="switchTab('reports', event)"><i class="fas fa-file-contract"></i> Reports</button>
                     <button class="nav-item" onclick="switchTab('servers', event)"><i class="fas fa-server"></i> Servers</button>
                 </div>
                 <div class="nav-section">
@@ -97,6 +98,7 @@
                     <button class="nav-item" onclick="switchTab('rcon', event)"><i class="fas fa-terminal"></i> RCON Console</button>
                     <button class="nav-item" onclick="switchTab('alerts', event)"><i class="fas fa-exclamation-triangle"></i> Alert Rules</button>
                     <button class="nav-item" onclick="switchTab('notifications', event)"><i class="fas fa-bell"></i> Notifications</button>
+                    <button class="nav-item" onclick="switchTab('integrations', event)"><i class="fas fa-puzzle-piece"></i> Integrations</button>
                     <button class="nav-item" onclick="switchTab('webhooks', event)"><i class="fas fa-plug"></i> Webhooks</button>
                     <button class="nav-item" onclick="switchTab('maintenance', event)"><i class="fas fa-tools"></i> Maintenance</button>
                     <button class="nav-item" onclick="switchTab('monitor', event)"><i class="fas fa-heartbeat"></i> Monitor</button>
@@ -183,6 +185,40 @@
 
             <!-- Analytics Tab -->
             <div id="tab-analytics" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Servers by Type</div></div>
+                        <div class="card-body" id="analyticsByType" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Servers by Group</div></div>
+                        <div class="card-body" id="analyticsByGroup" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header"><div class="card-title">Uptime Overview</div></div>
+                    <div class="card-body" id="analyticsUptime" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="tab-reports" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">System Report</div>
+                        <button class="btn btn-primary" onclick="loadReports()"><i class="fas fa-sync"></i> Generate Report</button>
+                    </div>
+                    <div class="card-body" id="reportsContent" style="color: #737373; font-size: 0.875rem;">Click Generate Report to view statistics.</div>
+                </div>
+            </div>
+
+            <!-- Integrations Tab -->
+            <div id="tab-integrations" class="tab-content">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Integrations</div></div>
+                    <div class="card-body" id="integrationsList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                </div>
+            </div>
                 <div class="grid-2">
                     <div class="card">
                         <div class="card-header"><div class="card-title">Servers by Type</div></div>

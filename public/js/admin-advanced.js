@@ -12,6 +12,7 @@ function switchTab(tab, evt) {
     const titles = {
         overview: 'Overview',
         analytics: 'Analytics',
+        reports: 'Reports',
         servers: 'Servers',
         groups: 'Groups',
         tags: 'Tags',
@@ -20,6 +21,7 @@ function switchTab(tab, evt) {
         rcon: 'RCON Console',
         alerts: 'Alert Rules',
         notifications: 'Notifications',
+        integrations: 'Integrations',
         webhooks: 'Webhooks',
         maintenance: 'Maintenance',
         monitor: 'Monitor',
@@ -40,6 +42,8 @@ function switchTab(tab, evt) {
     if (tab === 'groups') loadGroups();
     if (tab === 'tags') loadTags();
     if (tab === 'analytics') loadAnalytics();
+    if (tab === 'reports') loadReports();
+    if (tab === 'integrations') loadIntegrations();
     if (tab === 'templates') loadTemplates();
     if (tab === 'alerts') loadAlerts();
     if (tab === 'audit') loadAudit();
@@ -367,6 +371,38 @@ window.loadStatusPages = () => {
             <a href="/status/${s.id}" target="_blank" class="btn"><i class="fas fa-external-link-alt"></i> Open</a>
         </div>
     `).join('') || '<span style="color: #737373;">No servers</span>';
+};
+
+window.loadReports = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/reports`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        document.getElementById('reportsContent').innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div style="padding: 1rem; background: #0a0a0a; border-radius: 8px;"><div style="color:#737373;font-size:0.75rem;">Total</div><div style="font-size:1.5rem;font-weight:600;">${data.summary.total}</div></div>
+                <div style="padding: 1rem; background: #0a0a0a; border-radius: 8px;"><div style="color:#737373;font-size:0.75rem;">Online</div><div style="font-size:1.5rem;font-weight:600;color:#22c55e;">${data.summary.online}</div></div>
+                <div style="padding: 1rem; background: #0a0a0a; border-radius: 8px;"><div style="color:#737373;font-size:0.75rem;">Offline</div><div style="font-size:1.5rem;font-weight:600;color:#ef4444;">${data.summary.offline}</div></div>
+                <div style="padding: 1rem; background: #0a0a0a; border-radius: 8px;"><div style="color:#737373;font-size:0.75rem;">Players</div><div style="font-size:1.5rem;font-weight:600;">${data.summary.totalPlayers}</div></div>
+            </div>
+            <div style="color: #737373; font-size: 0.75rem;">Generated: ${new Date(data.generated).toLocaleString()}</div>
+        `;
+    } catch(e) { console.error(e); }
+};
+
+window.loadIntegrations = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/integrations`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        document.getElementById('integrationsList').innerHTML = (data.integrations||[]).map(i=>`
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 10px;">
+                <div>
+                    <div style="color: #e5e5e5; font-weight: 500;">${escapeHtml(i.name)}</div>
+                    <div style="color: #737373; font-size: 0.75rem;">${i.id}</div>
+                </div>
+                <span class="badge ${i.enabled?'badge-green':'badge-gray'}">${i.enabled?'Enabled':'Disabled'}</span>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
 };
 
 window.cloneServer = async (id) => {

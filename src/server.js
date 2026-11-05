@@ -240,11 +240,38 @@ app.post('/admin/maintenance', express.json(), (req, res) => {
   res.json({ success: true, task: req.body });
 });
 
+app.get('/admin/reports', (req, res) => {
+  const servers = monitor.getServers();
+  res.json({
+    generated: new Date().toISOString(),
+    summary: {
+      total: servers.length,
+      online: servers.filter(s => s.status === 'online').length,
+      offline: servers.filter(s => s.status === 'offline').length,
+      totalPlayers: servers.reduce((a, s) => a + (parseInt(s.players) || 0), 0)
+    },
+    servers: servers.map(s => ({ name: s.name, status: s.status, players: s.players, uptime: s.uptime || 0 }))
+  });
+});
+
+app.get('/admin/integrations', (req, res) => {
+  res.json({ integrations: [
+    { id: 'discord', name: 'Discord', enabled: true },
+    { id: 'telegram', name: 'Telegram', enabled: false },
+    { id: 'webhook', name: 'Custom Webhooks', enabled: true },
+    { id: 'slack', name: 'Slack', enabled: false }
+  ]});
+});
+
+app.post('/admin/notes', express.json(), (req, res) => {
+  res.json({ success: true });
+});
+
 app.get('/status/:id', (req, res) => {
   const servers = monitor.getServers();
   const server = servers.find(s => s.id === req.params.id);
   if (!server) return res.status(404).send('Not found');
-  res.send(`<!DOCTYPE html><html><head><title>${server.name} - Status</title><style>body{font-family:system-ui;background:#0a0a0a;color:#e5e5e5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.card{background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:2rem;max-width:400px;width:90%}.status{display:inline-block;padding:0.25rem 0.75rem;border-radius:6px;font-size:0.875rem}.online{background:rgba(34,197,94,0.1);color:#22c55e}.offline{background:rgba(239,68,68,0.1);color:#ef4444}h1{margin:0 0 1rem;font-size:1.25rem}p{color:#737373;margin:0.5rem 0}</style></head><body><div class="card"><h1>${server.name}</h1><span class="status ${server.status}">${server.status}</span><p>${server.type} • ${server.host}:${server.port}</p><p>Players: ${server.players||0}/${server.maxplayers||'?'}</p><p>${server.description||''}</p></div></body></html>`);
+  res.send(`<!DOCTYPE html><html><head><title>${server.name} - Status</title><style>body{font-family:system-ui;background:#0a0a0a;color:#e5e5e5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.card{background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:2rem;max-width:400px;width:90%}.status{display:inline-block;padding:0.25rem 0.75rem;border-radius:6px;font-size:0.875rem}.online{background:rgba(34,197,94,0.1);color:#22c55e}.offline{background:rgba(239,68,68,0.1);color:#ef4444}h1{margin:0 0 1rem;font-size:1.25rem}p{color:#737373;margin:0.5rem 0}</style></head><body><div class="card"><h1>${server.name}</h1><span class="status ${server.status}">${server.status}</span><p>${server.type} • ${server.host}:${server.port}</p><p>Players: ${server.players||0}/${server.maxplayers||'?'}</p><p>${server.description||''}</p><p><small>Powered by GamePulse</small></p></div></body></html>`);
 });
 
 app.post('/api/refresh', async (req, res) => {
