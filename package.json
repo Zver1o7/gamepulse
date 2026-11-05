@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "2.3.0",
-  "description": "Massive update: modern admin with analytics, webhooks, RCON console, 100+ functions, descriptions/tags/notes, backups, API docs, Discord/Telegram alerts, uptime tracking, i18n (EN/RU), PWA. By Zver1o7"
+  "version": "2.4.0",
+  "description": "Mega update: analytics, templates, alert rules, maintenance, audit log, status pages, webhooks, modern admin, RCON console, 150+ functions. By Zver1o7"
   "main": "src/server.js",
   "type": "module",
   "scripts": {

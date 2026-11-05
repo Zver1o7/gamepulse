@@ -203,6 +203,50 @@ app.get('/admin/apikeys', (req, res) => {
   res.json({ keys: [{ name: 'default', key: 'gp_****', created: new Date().toISOString() }] });
 });
 
+app.get('/admin/templates', (req, res) => {
+  res.json({ templates: [
+    { id: 'minecraft', name: 'Minecraft Java', type: 'minecraft', port: 25565 },
+    { id: 'cs2', name: 'Counter-Strike 2', type: 'cs2', port: 27015 },
+    { id: 'fivem', name: 'FiveM', type: 'fivem', port: 30120 },
+    { id: 'gmod', name: 'Garry\'s Mod', type: 'garrysmod', port: 27015 },
+    { id: 'rust', name: 'Rust', type: 'rust', port: 28015 },
+    { id: 'ark', name: 'ARK: Survival Evolved', type: 'arkse', port: 7777 }
+  ]});
+});
+
+app.get('/admin/audit', (req, res) => {
+  res.json({ logs: [
+    { time: new Date().toISOString(), user: 'admin', action: 'login', details: 'Admin panel accessed' },
+    { time: new Date().toISOString(), user: 'admin', action: 'view', details: 'Viewed server list' }
+  ]});
+});
+
+app.get('/admin/alerts', (req, res) => {
+  res.json({ rules: [
+    { id: '1', name: 'Server Offline', condition: 'status == offline', action: 'notify', enabled: true },
+    { id: '2', name: 'High Player Count', condition: 'players > 90%', action: 'notify', enabled: false }
+  ]});
+});
+
+app.post('/admin/alerts', express.json(), (req, res) => {
+  res.json({ success: true, rule: req.body });
+});
+
+app.get('/admin/maintenance', (req, res) => {
+  res.json({ tasks: [] });
+});
+
+app.post('/admin/maintenance', express.json(), (req, res) => {
+  res.json({ success: true, task: req.body });
+});
+
+app.get('/status/:id', (req, res) => {
+  const servers = monitor.getServers();
+  const server = servers.find(s => s.id === req.params.id);
+  if (!server) return res.status(404).send('Not found');
+  res.send(`<!DOCTYPE html><html><head><title>${server.name} - Status</title><style>body{font-family:system-ui;background:#0a0a0a;color:#e5e5e5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.card{background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:2rem;max-width:400px;width:90%}.status{display:inline-block;padding:0.25rem 0.75rem;border-radius:6px;font-size:0.875rem}.online{background:rgba(34,197,94,0.1);color:#22c55e}.offline{background:rgba(239,68,68,0.1);color:#ef4444}h1{margin:0 0 1rem;font-size:1.25rem}p{color:#737373;margin:0.5rem 0}</style></head><body><div class="card"><h1>${server.name}</h1><span class="status ${server.status}">${server.status}</span><p>${server.type} • ${server.host}:${server.port}</p><p>Players: ${server.players||0}/${server.maxplayers||'?'}</p><p>${server.description||''}</p></div></body></html>`);
+});
+
 app.post('/api/refresh', async (req, res) => {
   try {
     await monitor.refreshAll();

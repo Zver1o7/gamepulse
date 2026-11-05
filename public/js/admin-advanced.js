@@ -15,13 +15,18 @@ function switchTab(tab, evt) {
         servers: 'Servers',
         groups: 'Groups',
         tags: 'Tags',
+        templates: 'Templates',
         users: 'Users',
         rcon: 'RCON Console',
+        alerts: 'Alert Rules',
         notifications: 'Notifications',
         webhooks: 'Webhooks',
+        maintenance: 'Maintenance',
         monitor: 'Monitor',
         backup: 'Backup & Restore',
         logs: 'Logs',
+        audit: 'Audit Log',
+        statuspage: 'Status Pages',
         api: 'API',
         plugins: 'Plugins',
         system: 'Settings',
@@ -35,6 +40,10 @@ function switchTab(tab, evt) {
     if (tab === 'groups') loadGroups();
     if (tab === 'tags') loadTags();
     if (tab === 'analytics') loadAnalytics();
+    if (tab === 'templates') loadTemplates();
+    if (tab === 'alerts') loadAlerts();
+    if (tab === 'audit') loadAudit();
+    if (tab === 'statuspage') loadStatusPages();
     if (tab === 'overview') fetchServers();
 }
 
@@ -287,6 +296,77 @@ window.addWebhook = async () => {
     if(!url) return;
     await fetch(`${API_BASE}/webhooks`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
     alert('Webhook added');
+};
+
+window.loadTemplates = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/templates`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        const div = document.getElementById('templatesList');
+        div.innerHTML = (data.templates||[]).map(t=>`
+            <div style="padding: 1rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 10px;">
+                <div style="color: #e5e5e5; font-weight: 500; margin-bottom: 0.25rem;">${escapeHtml(t.name)}</div>
+                <div style="color: #737373; font-size: 0.75rem; margin-bottom: 0.75rem;">${escapeHtml(t.type)} • port ${t.port}</div>
+                <button class="btn" onclick="useTemplate('${t.type}', ${t.port})"><i class="fas fa-plus"></i> Use Template</button>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
+};
+
+window.useTemplate = (type, port) => {
+    showAddModal();
+    document.getElementById('type').value = type;
+    document.getElementById('port').value = port;
+};
+
+window.loadAlerts = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/alerts`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        const div = document.getElementById('alertsList');
+        div.innerHTML = (data.rules||[]).map(r=>`
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 10px; margin-bottom: 0.5rem;">
+                <div>
+                    <div style="color: #e5e5e5; font-weight: 500;">${escapeHtml(r.name)}</div>
+                    <div style="color: #737373; font-size: 0.75rem;">${escapeHtml(r.condition)} → ${escapeHtml(r.action)}</div>
+                </div>
+                <span class="badge ${r.enabled?'badge-green':'badge-gray'}">${r.enabled?'Enabled':'Disabled'}</span>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
+};
+
+window.addAlertRule = () => {
+    const name = prompt('Rule name:');
+    if(name) alert('Rule created: ' + name);
+    loadAlerts();
+};
+
+window.addMaintenance = () => {
+    const task = prompt('Maintenance task:');
+    if(task) alert('Scheduled: ' + task);
+};
+
+window.loadAudit = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/audit`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        document.getElementById('auditLog').innerHTML = (data.logs||[]).map(l=>`[${l.time}] ${l.user} - ${l.action}: ${l.details}`).join('<br>');
+    } catch(e) { console.error(e); }
+};
+
+window.loadStatusPages = () => {
+    const div = document.getElementById('statusPagesList');
+    if(!div) return;
+    div.innerHTML = allServers.map(s=>`
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 8px;">
+            <div>
+                <div style="color: #e5e5e5; font-size: 0.875rem;">${escapeHtml(s.name)}</div>
+                <div style="color: #737373; font-size: 0.75rem;">/status/${s.id}</div>
+            </div>
+            <a href="/status/${s.id}" target="_blank" class="btn"><i class="fas fa-external-link-alt"></i> Open</a>
+        </div>
+    `).join('') || '<span style="color: #737373;">No servers</span>';
 };
 
 window.cloneServer = async (id) => {

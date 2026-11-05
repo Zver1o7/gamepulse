@@ -89,19 +89,24 @@
                     <div class="nav-label">Management</div>
                     <button class="nav-item" onclick="switchTab('groups', event)"><i class="fas fa-layer-group"></i> Groups</button>
                     <button class="nav-item" onclick="switchTab('tags', event)"><i class="fas fa-tags"></i> Tags</button>
+                    <button class="nav-item" onclick="switchTab('templates', event)"><i class="fas fa-clone"></i> Templates</button>
                     <button class="nav-item" onclick="switchTab('users', event)"><i class="fas fa-users"></i> Users</button>
                 </div>
                 <div class="nav-section">
                     <div class="nav-label">Control</div>
                     <button class="nav-item" onclick="switchTab('rcon', event)"><i class="fas fa-terminal"></i> RCON Console</button>
+                    <button class="nav-item" onclick="switchTab('alerts', event)"><i class="fas fa-exclamation-triangle"></i> Alert Rules</button>
                     <button class="nav-item" onclick="switchTab('notifications', event)"><i class="fas fa-bell"></i> Notifications</button>
                     <button class="nav-item" onclick="switchTab('webhooks', event)"><i class="fas fa-plug"></i> Webhooks</button>
+                    <button class="nav-item" onclick="switchTab('maintenance', event)"><i class="fas fa-tools"></i> Maintenance</button>
                     <button class="nav-item" onclick="switchTab('monitor', event)"><i class="fas fa-heartbeat"></i> Monitor</button>
                 </div>
                 <div class="nav-section">
                     <div class="nav-label">System</div>
                     <button class="nav-item" onclick="switchTab('backup', event)"><i class="fas fa-database"></i> Backup & Restore</button>
                     <button class="nav-item" onclick="switchTab('logs', event)"><i class="fas fa-file-alt"></i> Logs</button>
+                    <button class="nav-item" onclick="switchTab('audit', event)"><i class="fas fa-history"></i> Audit Log</button>
+                    <button class="nav-item" onclick="switchTab('statuspage', event)"><i class="fas fa-globe"></i> Status Pages</button>
                     <button class="nav-item" onclick="switchTab('api', event)"><i class="fas fa-code"></i> API</button>
                     <button class="nav-item" onclick="switchTab('plugins', event)"><i class="fas fa-puzzle-piece"></i> Plugins</button>
                     <button class="nav-item" onclick="switchTab('system', event)"><i class="fas fa-cog"></i> Settings</button>
@@ -203,6 +208,65 @@
                     </div>
                     <div class="card-body">
                         <div id="webhooksList" style="color: #737373; font-size: 0.875rem;">No webhooks configured. Add webhooks to receive events on server status changes.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div id="tab-templates" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Server Templates</div>
+                        <button class="btn btn-primary" onclick="loadTemplates()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div class="card-body" id="templatesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;"></div>
+                </div>
+            </div>
+
+            <!-- Alert Rules Tab -->
+            <div id="tab-alerts" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Alert Rules</div>
+                        <button class="btn btn-primary" onclick="addAlertRule()"><i class="fas fa-plus"></i> Add Rule</button>
+                    </div>
+                    <div class="card-body" id="alertsList" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Maintenance Tab -->
+            <div id="tab-maintenance" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Maintenance Schedule</div>
+                        <button class="btn btn-primary" onclick="addMaintenance()"><i class="fas fa-plus"></i> Schedule</button>
+                    </div>
+                    <div class="card-body" id="maintenanceList" style="color: #737373; font-size: 0.875rem;">No scheduled maintenance tasks.</div>
+                </div>
+            </div>
+
+            <!-- Audit Log Tab -->
+            <div id="tab-audit" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Audit Log</div>
+                        <button class="btn" onclick="loadAudit()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="console" id="auditLog" style="max-height: 500px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Pages Tab -->
+            <div id="tab-statuspage" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Public Status Pages</div>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: #737373; font-size: 0.875rem; margin-bottom: 1rem;">Each server has a public status page at <code style="color: #e5e5e5;">/status/:id</code></p>
+                        <div id="statusPagesList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
                     </div>
                 </div>
             </div>
