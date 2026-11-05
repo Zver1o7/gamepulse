@@ -231,16 +231,31 @@ pm2 startup
 - **Frontend**: Vanilla JavaScript, CSS3 with modern animations
 - **Fonts**: [Inter](https://rsms.me/inter/), [Font Awesome](https://fontawesome.com/)
 
-## 📊 API Endpoints
+## API Endpoints
 
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/servers` | GET | Get all server statuses |
 | `/api/stats` | GET | Get dashboard statistics |
+| `/api/history/:id` | GET | Get uptime history for a server |
+| `/api/badge/:id.svg` | GET | Get status badge SVG |
+| `/api/rcon/:id` | POST | Send RCON command |
+| `/api/auth/login` | POST | Admin login |
+| `/api/auth/me` | GET | Current session info |
+| `/status/:id` | GET | Public status page |
+| `/admin/*` | GET/POST/PUT/DELETE | Admin API (requires auth) |
 
-## 🤝 Contributing
+See `/docs.html` for more details.
 
-Contributions are welcome! Feel free to:
+## Admin Panel
+
+- URL: `/admin` (redirects to `/login.html` if not authenticated)
+- Default login: `admin` / `admin123`
+- Set custom credentials via env vars: `ADMIN_USER`, `ADMIN_PASSWORD`
+
+## Contributing
+
+Contributions are welcome!
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -248,11 +263,11 @@ Contributions are welcome! Feel free to:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 💡 Ideas for Future
+## Roadmap
 
 - [x] Discord webhook notifications
 - [x] Telegram bot integration
@@ -261,15 +276,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] RCON integration (API)
 - [x] Multi-language support (EN/RU)
 - [x] PWA support
-- [ ] Server uptime history & graphs (UI)
-- [ ] User authentication
-- [ ] Advanced charts & analytics
+- [x] Server uptime history & graphs (UI)
+- [x] User authentication
+- [x] Advanced charts & analytics
+- [x] Public status pages
+- [x] Webhooks & integrations
+- [x] Alert rules & maintenance
+- [ ] Multi-user roles & permissions
+- [ ] Scheduled reports & email notifications
+- [ ] Mobile app
 
 ---
 
 <div align="center">
 
-**Made with ❤️ for the game server community**
+**Made with care for the game server community**  
+**By Zver1o7** — [GitHub](https://github.com/Zver1o7/gamepulse)
 
 [Report Bug](https://github.com/Zver1o7/gamepulse/issues) • [Request Feature](https://github.com/Zver1o7/gamepulse/issues)
 
