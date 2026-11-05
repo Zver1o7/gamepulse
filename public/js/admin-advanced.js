@@ -1,7 +1,30 @@
-const ADMIN_PASSWORD = prompt('Enter admin password:') || 'admin123';
+let AUTH_TOKEN = localStorage.getItem('gp_token') || '';
 const API_BASE = '/admin';
 let allServers = [];
 let groups = [];
+let uptimeChart = null;
+
+async function checkAuth() {
+    if (!AUTH_TOKEN) {
+        window.location.href = '/login.html';
+        return false;
+    }
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        if (!res.ok) {
+            localStorage.removeItem('gp_token');
+            window.location.href = '/login.html';
+            return false;
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function authHeaders() {
+    return { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' };
+}
 
 function switchTab(tab, evt) {
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
@@ -54,7 +77,7 @@ function switchTab(tab, evt) {
 async function fetchServers() {
     try {
         const res = await fetch(`${API_BASE}/servers`, {
-            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+            headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
         });
         if (res.status === 401) {
             alert('Unauthorized');
@@ -192,7 +215,7 @@ window.deleteServer = async (id) => {
     if (!confirm('Delete this server?')) return;
     await fetch(`${API_BASE}/servers/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
     });
     fetchServers();
 };
@@ -226,14 +249,14 @@ window.moveServer = (id) => {
     const group = prompt('Move to group (leave empty for none):');
     fetch(`${API_BASE}/servers/${id}`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ group: group || '' })
     }).then(()=>fetchServers());
 };
 
 window.pingServer = async (id) => {
     alert('Pinging server...');
-    await fetch(`${API_BASE}/servers/${id}/test`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    await fetch(`${API_BASE}/servers/${id}/test`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
     setTimeout(fetchServers, 1500);
 };
 
@@ -246,7 +269,7 @@ window.bulkCopy = async () => {
     for(const s of allServers) {
         const {id:_, ...clone} = s;
         clone.name = clone.name + ' (Copy)';
-        await fetch(`${API_BASE}/servers`, { method:'POST', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`,'Content-Type':'application/json'}, body:JSON.stringify(clone) });
+        await fetch(`${API_BASE}/servers`, { method:'POST', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'}, body:JSON.stringify(clone) });
     }
     fetchServers();
 };
@@ -254,7 +277,7 @@ window.bulkCopy = async () => {
 window.bulkDelete = async () => {
     if(!confirm('Delete ALL servers? This cannot be undone!')) return;
     for(const s of allServers) {
-        await fetch(`${API_BASE}/servers/${s.id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`} });
+        await fetch(`${API_BASE}/servers/${s.id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`} });
     }
     fetchServers();
 };
@@ -262,7 +285,7 @@ window.bulkDelete = async () => {
 window.testAll = async () => {
     alert('Testing all servers...');
     for(const s of allServers) {
-        await fetch(`${API_BASE}/servers/${s.id}/test`, { method:'POST', headers:{'Authorization':`Bearer ${ADMIN_PASSWORD}`} });
+        await fetch(`${API_BASE}/servers/${s.id}/test`, { method:'POST', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`} });
     }
     setTimeout(fetchServers, 3000);
 };
@@ -283,28 +306,103 @@ window.removeTag = (tag) => {
     if(confirm('Remove tag "'+tag+'"?')) loadTags();
 };
 
+let charts = {};
+
+function renderChart(id, type, labels, data, colors) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(ctx, {
+        type,
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: colors || ['#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#a3a3a3', font: { size: 11 } } } },
+            scales: type === 'bar' || type === 'line' ? { 
+                x: { ticks: { color: '#737373' }, grid: { color: '#1f1f1f' } },
+                y: { ticks: { color: '#737373' }, grid: { color: '#1f1f1f' }, beginAtZero: true }
+            } : {}
+        }
+    });
+}
+
 window.loadAnalytics = async () => {
     try {
-        const res = await fetch(`${API_BASE}/analytics`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/analytics`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
-        document.getElementById('analyticsByType').innerHTML = Object.keys(data.byType||{}).length ? Object.entries(data.byType).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
-        document.getElementById('analyticsByGroup').innerHTML = Object.keys(data.byGroup||{}).length ? Object.entries(data.byGroup).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
+        const byType = data.byType || {};
+        const byGroup = data.byGroup || {};
+        const online = data.online || 0;
+        const offline = (data.total || 0) - online;
+
+        renderChart('typeChart', 'doughnut', Object.keys(byType), Object.values(byType));
+        renderChart('groupChart', 'bar', Object.keys(byGroup), Object.values(byGroup), ['#3b82f6']);
+        renderChart('statusChart', 'doughnut', ['Online', 'Offline'], [online, offline], ['#22c55e', '#ef4444']);
+
+        document.getElementById('analyticsByType').innerHTML = Object.keys(byType).length ? Object.entries(byType).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
+        document.getElementById('analyticsByGroup').innerHTML = Object.keys(byGroup).length ? Object.entries(byGroup).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
         document.getElementById('analyticsUptime').innerHTML = (data.history||[]).map(s=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${escapeHtml(s.name)}</span><span class="badge ${s.uptime>90?'badge-green':'badge-gray'}">${s.uptime||0}%</span></div>`).join('') || 'No uptime data';
+
+        const sel = document.getElementById('historyServerSelect');
+        if (sel && allServers.length) {
+            sel.innerHTML = allServers.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+            loadServerHistory();
+        }
     } catch(e) {
         console.error(e);
     }
 };
 
+window.loadServerHistory = async () => {
+    const id = document.getElementById('historyServerSelect')?.value;
+    if (!id) return;
+    try {
+        const res = await fetch(`/api/history/${id}`);
+        const history = await res.json();
+        if (history && history.length) {
+            const labels = history.slice(-20).map((_, i) => `#${i+1}`);
+            const data = history.slice(-20).map(h => h.online ? 100 : 0);
+            renderChart('uptimeChart', 'line', labels, data, ['#22c55e']);
+            document.getElementById('historyInfo').textContent = `${history.length} data points recorded`;
+        } else {
+            if (charts.uptimeChart) charts.uptimeChart.destroy();
+            const ctx = document.getElementById('uptimeChart');
+            if (ctx) {
+                ctx.getContext('2d').clearRect(0,0,ctx.width,ctx.height);
+            }
+            document.getElementById('historyInfo').textContent = 'No history data yet. Uptime will be tracked over time.';
+        }
+    } catch(e) {
+        document.getElementById('historyInfo').textContent = 'Failed to load history';
+    }
+};
+
+window.logout = async () => {
+    try {
+        await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+    } catch(e) {}
+    localStorage.removeItem('gp_token');
+    localStorage.removeItem('gp_user');
+    window.location.href = '/login.html';
+};
+
 window.addWebhook = async () => {
     const url = prompt('Webhook URL:');
     if(!url) return;
-    await fetch(`${API_BASE}/webhooks`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    await fetch(`${API_BASE}/webhooks`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
     alert('Webhook added');
 };
 
 window.loadTemplates = async () => {
     try {
-        const res = await fetch(`${API_BASE}/templates`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/templates`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
         const div = document.getElementById('templatesList');
         div.innerHTML = (data.templates||[]).map(t=>`
@@ -325,7 +423,7 @@ window.useTemplate = (type, port) => {
 
 window.loadAlerts = async () => {
     try {
-        const res = await fetch(`${API_BASE}/alerts`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/alerts`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
         const div = document.getElementById('alertsList');
         div.innerHTML = (data.rules||[]).map(r=>`
@@ -353,7 +451,7 @@ window.addMaintenance = () => {
 
 window.loadAudit = async () => {
     try {
-        const res = await fetch(`${API_BASE}/audit`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/audit`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
         document.getElementById('auditLog').innerHTML = (data.logs||[]).map(l=>`[${l.time}] ${l.user} - ${l.action}: ${l.details}`).join('<br>');
     } catch(e) { console.error(e); }
@@ -375,7 +473,7 @@ window.loadStatusPages = () => {
 
 window.loadReports = async () => {
     try {
-        const res = await fetch(`${API_BASE}/reports`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/reports`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
         document.getElementById('reportsContent').innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
@@ -391,7 +489,7 @@ window.loadReports = async () => {
 
 window.loadIntegrations = async () => {
     try {
-        const res = await fetch(`${API_BASE}/integrations`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const res = await fetch(`${API_BASE}/integrations`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
         const data = await res.json();
         document.getElementById('integrationsList').innerHTML = (data.integrations||[]).map(i=>`
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 10px;">
@@ -412,7 +510,7 @@ window.cloneServer = async (id) => {
     clone.name = clone.name + ' (Copy)';
     await fetch(`${API_BASE}/servers`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(clone)
     });
     fetchServers();
@@ -423,7 +521,7 @@ window.toggleServer = async (id) => {
     if (!server) return;
     await fetch(`${API_BASE}/servers/${id}/toggle`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
     });
     fetchServers();
 };
@@ -432,31 +530,31 @@ window.testServer = async (id) => {
     alert('Testing server... Check console/logs');
     await fetch(`${API_BASE}/servers/${id}/test`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` }
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
     });
     setTimeout(fetchServers, 2000);
 };
 
 window.bulkEnable = async () => {
     if (!confirm('Enable all servers?')) return;
-    await fetch(`${API_BASE}/servers/bulk/enable`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    await fetch(`${API_BASE}/servers/bulk/enable`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
     fetchServers();
 };
 
 window.bulkDisable = async () => {
     if (!confirm('Disable all servers?')) return;
-    await fetch(`${API_BASE}/servers/bulk/disable`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    await fetch(`${API_BASE}/servers/bulk/disable`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
     fetchServers();
 };
 
 window.refreshAll = async () => {
     await fetch('/api/refresh', { method: 'POST' }).catch(()=>{});
-    await fetch(`${API_BASE}/refresh`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    await fetch(`${API_BASE}/refresh`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
     fetchServers();
 };
 
 window.exportConfig = async () => {
-    const res = await fetch(`${API_BASE}/servers`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+    const res = await fetch(`${API_BASE}/servers`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
     const servers = await res.json();
     const blob = new Blob([JSON.stringify(servers, null, 2)], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
@@ -472,7 +570,7 @@ window.importConfig = async (input) => {
         const servers = JSON.parse(text);
         await fetch('/admin/import', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ servers })
         });
         alert('Imported successfully');
@@ -568,13 +666,13 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
     if(editId) {
         await fetch(`${API_BASE}/servers/${editId}`, {
             method: 'PUT',
-            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
     } else {
         await fetch(`${API_BASE}/servers`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
     }
@@ -583,7 +681,11 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
     fetchServers();
 });
 
-fetchServers();
-setInterval(fetchServers, 30000);
-loadSystem();
-setInterval(loadSystem, 1000);
+(async () => {
+    if (await checkAuth()) {
+        fetchServers();
+        setInterval(fetchServers, 30000);
+        loadSystem();
+        setInterval(loadSystem, 1000);
+    }
+})();

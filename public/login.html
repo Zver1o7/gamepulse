@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamePulse - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #0a0a0a; color: #e5e5e5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: linear-gradient(180deg, #111 0%, #0f0f0f 100%); border: 1px solid #1f1f1f; border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; }
+        h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        p { color: #737373; font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.8125rem; color: #a3a3a3; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 0.75rem; background: #0a0a0a; border: 1px solid #262626; border-radius: 8px; color: #e5e5e5; font-size: 0.875rem; }
+        input:focus { outline: none; border-color: #3b82f6; }
+        button { width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; border-radius: 8px; color: white; font-weight: 500; cursor: pointer; margin-top: 0.5rem; }
+        button:hover { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+        .error { color: #ef4444; font-size: 0.8125rem; margin-top: 0.75rem; display: none; }
+        .back { display: block; text-align: center; margin-top: 1rem; color: #737373; text-decoration: none; font-size: 0.8125rem; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>GamePulse Admin</h1>
+        <p>Sign in to access the admin panel</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" value="admin" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Sign In</button>
+            <div class="error" id="error">Invalid credentials</div>
+        </form>
+        <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.success && data.token) {
+                    localStorage.setItem('gp_token', data.token);
+                    localStorage.setItem('gp_user', username);
+                    window.location.href = '/admin.html';
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

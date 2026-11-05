@@ -36,14 +36,52 @@ app.get('/api/history/:id', (req, res) => {
 });
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const sessions = new Map();
+
+app.post('/api/auth/login', express.json(), (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USER && password === ADMIN_PASSWORD) {
+    const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    sessions.set(token, { username, createdAt: Date.now() });
+    return res.json({ success: true, token, username });
+  }
+  res.status(401).json({ success: false, error: 'Invalid credentials' });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const auth = req.headers.authorization?.replace('Bearer ', '');
+  if (auth) sessions.delete(auth);
+  res.json({ success: true });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const auth = req.headers.authorization?.replace('Bearer ', '');
+  const session = auth && sessions.get(auth);
+  if (session) return res.json({ authenticated: true, username: session.username });
+  res.status(401).json({ authenticated: false });
+});
+
+app.post('/api/auth/change-password', express.json(), (req, res) => {
+  const auth = req.headers.authorization?.replace('Bearer ', '');
+  const session = auth && sessions.get(auth);
+  if (!session) return res.status(401).json({ error: 'Unauthorized' });
+  // Note: In production, store hashed passwords in a database
+  // For this simple implementation, password is set via ADMIN_PASSWORD env var
+  res.json({ success: true, message: 'Password change requires updating ADMIN_PASSWORD environment variable and restarting the server' });
+});
+
+app.get('/admin/users', (req, res) => {
+  res.json({ users: [{ username: ADMIN_USER, role: 'admin', active: true }] });
+});
 
 app.use('/admin', (req, res, next) => {
-  const auth = req.headers.authorization;
+  const auth = req.headers.authorization?.replace('Bearer ', '');
   if (req.path === '/login') return next();
-  if (!auth || auth !== `Bearer ${ADMIN_PASSWORD}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (auth && (sessions.has(auth) || auth === ADMIN_PASSWORD)) {
+    return next();
   }
-  next();
+  return res.status(401).json({ error: 'Unauthorized' });
 });
 
 app.get('/admin/servers', (req, res) => {

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background: #0a0a0a; }
@@ -128,6 +129,7 @@
                 <div class="topbar-actions">
                     <button class="btn" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Refresh</button>
                     <button class="btn btn-primary" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Server</button>
+                    <button class="btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
             </header>
 
@@ -188,11 +190,24 @@
                 <div class="grid-2">
                     <div class="card">
                         <div class="card-header"><div class="card-title">Servers by Type</div></div>
-                        <div class="card-body" id="analyticsByType" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                        <div class="card-body"><canvas id="typeChart" height="200"></canvas><div id="analyticsByType" style="margin-top: 1rem; color: #737373; font-size: 0.875rem;"></div></div>
                     </div>
                     <div class="card">
                         <div class="card-header"><div class="card-title">Servers by Group</div></div>
-                        <div class="card-body" id="analyticsByGroup" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                        <div class="card-body"><canvas id="groupChart" height="200"></canvas><div id="analyticsByGroup" style="margin-top: 1rem; color: #737373; font-size: 0.875rem;"></div></div>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1.5rem;">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Online vs Offline</div></div>
+                        <div class="card-body"><canvas id="statusChart" height="200"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Server Uptime History</div>
+                            <select id="historyServerSelect" class="form-input" style="width: 200px;" onchange="loadServerHistory()"></select>
+                        </div>
+                        <div class="card-body"><canvas id="uptimeChart" height="200"></canvas><div id="historyInfo" style="margin-top: 0.75rem; color: #737373; font-size: 0.8125rem;"></div></div>
                     </div>
                 </div>
                 <div class="card" style="margin-top: 1.5rem;">

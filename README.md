@@ -75,16 +75,19 @@
 - **Clean Dashboard** - Professional dark/light theme
 - **Search & Filters** - Quickly find servers by name, game, or filter by status
 - **Server Groups** - Organize servers by categories
-- **Modern Admin Panel** - Sleek sidebar design with 100+ functions
-- **Analytics Dashboard** - Servers by type/group, uptime overview
+- **User Authentication** - Secure login for admin panel with session tokens
+- **Uptime History & Graphs** - Visual charts showing server uptime over time
+- **Advanced Analytics** - Charts for server types, groups, status distribution
+- **Modern Admin Panel** - Sleek sidebar design with 150+ functions
+- **Reports & Insights** - Generate system reports and statistics
 - **Server Descriptions & Tags** - Rich metadata for every server
-- **Server Groups** - Organize and manage servers by groups
-- **Webhooks** - Custom webhook integrations
-- **Notifications Control** - Discord/Telegram webhook configuration from admin
+- **Server Groups & Templates** - Organize servers and quick-add with templates
+- **Alert Rules & Maintenance** - Configurable alerts and maintenance scheduling
+- **Webhooks & Integrations** - Discord, Telegram, custom webhooks, Slack
+- **Status Pages** - Public status page for each server (`/status/:id`)
 - **RCON Console** - Built-in remote console in admin panel
+- **Audit Log** - Track admin actions and system events
 - **Backup & Restore** - Export/import configurations, create backups
-- **System Monitoring** - Logs viewer, system info, uptime tracking
-- **User & API Management** - Manage admin users and API keys
 - **At-a-Glance Stats** - Total servers, online count, player count, and uptime
 - **Uptime Tracking** - Historical uptime percentage for each server
 - **Discord & Telegram Alerts** - Get notified when servers go down or come back up
