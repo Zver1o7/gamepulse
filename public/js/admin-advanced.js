@@ -11,12 +11,14 @@ function switchTab(tab, evt) {
     
     const titles = {
         overview: 'Overview',
+        analytics: 'Analytics',
         servers: 'Servers',
         groups: 'Groups',
         tags: 'Tags',
         users: 'Users',
         rcon: 'RCON Console',
         notifications: 'Notifications',
+        webhooks: 'Webhooks',
         monitor: 'Monitor',
         backup: 'Backup & Restore',
         logs: 'Logs',
@@ -32,6 +34,7 @@ function switchTab(tab, evt) {
     if (tab === 'rcon') loadRconServers();
     if (tab === 'groups') loadGroups();
     if (tab === 'tags') loadTags();
+    if (tab === 'analytics') loadAnalytics();
     if (tab === 'overview') fetchServers();
 }
 
@@ -265,6 +268,25 @@ window.addTag = () => {
 
 window.removeTag = (tag) => {
     if(confirm('Remove tag "'+tag+'"?')) loadTags();
+};
+
+window.loadAnalytics = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/analytics`, { headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` } });
+        const data = await res.json();
+        document.getElementById('analyticsByType').innerHTML = Object.keys(data.byType||{}).length ? Object.entries(data.byType).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
+        document.getElementById('analyticsByGroup').innerHTML = Object.keys(data.byGroup||{}).length ? Object.entries(data.byGroup).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${k}</span><span>${v}</span></div>`).join('') : 'No data';
+        document.getElementById('analyticsUptime').innerHTML = (data.history||[]).map(s=>`<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #1f1f1f;"><span>${escapeHtml(s.name)}</span><span class="badge ${s.uptime>90?'badge-green':'badge-gray'}">${s.uptime||0}%</span></div>`).join('') || 'No uptime data';
+    } catch(e) {
+        console.error(e);
+    }
+};
+
+window.addWebhook = async () => {
+    const url = prompt('Webhook URL:');
+    if(!url) return;
+    await fetch(`${API_BASE}/webhooks`, { method: 'POST', headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    alert('Webhook added');
 };
 
 window.cloneServer = async (id) => {

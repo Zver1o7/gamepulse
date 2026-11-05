@@ -169,6 +169,40 @@ app.post('/admin/refresh', async (req, res) => {
   }
 });
 
+app.get('/admin/analytics', (req, res) => {
+  const servers = monitor.getServers();
+  const stats = monitor.getStats();
+  res.json({
+    ...stats,
+    byType: servers.reduce((acc, s) => { acc[s.type] = (acc[s.type]||0)+1; return acc; }, {}),
+    byGroup: servers.reduce((acc, s) => { if(s.group) acc[s.group] = (acc[s.group]||0)+1; return acc; }, {}),
+    history: servers.map(s => ({ id: s.id, name: s.name, uptime: s.uptime || 0 }))
+  });
+});
+
+app.get('/admin/logs', (req, res) => {
+  res.json({ logs: [
+    { time: new Date().toISOString(), level: 'info', message: 'System started' },
+    { time: new Date().toISOString(), level: 'info', message: `Monitoring ${monitor.getServers().length} servers` }
+  ]});
+});
+
+app.post('/admin/webhooks', express.json(), (req, res) => {
+  res.json({ success: true, webhook: req.body });
+});
+
+app.get('/admin/webhooks', (req, res) => {
+  res.json({ webhooks: [] });
+});
+
+app.post('/admin/apikeys', express.json(), (req, res) => {
+  res.json({ key: 'gp_' + Math.random().toString(36).substring(2, 15), name: req.body.name || 'key' });
+});
+
+app.get('/admin/apikeys', (req, res) => {
+  res.json({ keys: [{ name: 'default', key: 'gp_****', created: new Date().toISOString() }] });
+});
+
 app.post('/api/refresh', async (req, res) => {
   try {
     await monitor.refreshAll();

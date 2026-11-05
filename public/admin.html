@@ -82,6 +82,7 @@
                 <div class="nav-section">
                     <div class="nav-label">Main</div>
                     <button class="nav-item active" onclick="switchTab('overview', event)"><i class="fas fa-chart-pie"></i> Overview</button>
+                    <button class="nav-item" onclick="switchTab('analytics', event)"><i class="fas fa-chart-bar"></i> Analytics</button>
                     <button class="nav-item" onclick="switchTab('servers', event)"><i class="fas fa-server"></i> Servers</button>
                 </div>
                 <div class="nav-section">
@@ -94,6 +95,7 @@
                     <div class="nav-label">Control</div>
                     <button class="nav-item" onclick="switchTab('rcon', event)"><i class="fas fa-terminal"></i> RCON Console</button>
                     <button class="nav-item" onclick="switchTab('notifications', event)"><i class="fas fa-bell"></i> Notifications</button>
+                    <button class="nav-item" onclick="switchTab('webhooks', event)"><i class="fas fa-plug"></i> Webhooks</button>
                     <button class="nav-item" onclick="switchTab('monitor', event)"><i class="fas fa-heartbeat"></i> Monitor</button>
                 </div>
                 <div class="nav-section">
@@ -144,6 +146,66 @@
                         <div class="stat-value" id="ovPlayers">0</div>
                     </div>
                 </div>
+                <div class="grid-2" style="margin-top: 1.5rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Quick Actions</div>
+                        </div>
+                        <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="btn" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Force Refresh All</button>
+                            <button class="btn" onclick="bulkEnable()"><i class="fas fa-check-circle"></i> Enable All Servers</button>
+                            <button class="btn" onclick="bulkDisable()"><i class="fas fa-ban"></i> Disable All Servers</button>
+                            <button class="btn" onclick="exportConfig()"><i class="fas fa-file-export"></i> Export Full Config</button>
+                            <button class="btn" onclick="testAll()"><i class="fas fa-vial"></i> Test All Connections</button>
+                            <button class="btn" onclick="clearLogs()"><i class="fas fa-eraser"></i> Clear Logs</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">System Status</div>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 0.875rem;">
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">Monitoring</span><span class="badge badge-green">Active</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">WebSocket</span><span class="badge badge-green">Connected</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">Uptime</span><span style="color: #e5e5e5; font-size: 0.875rem;" id="sysUptime">Running</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #737373; font-size: 0.875rem;">Version</span><span style="color: #e5e5e5; font-size: 0.875rem;">2.2.0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="tab-analytics" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Servers by Type</div></div>
+                        <div class="card-body" id="analyticsByType" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Servers by Group</div></div>
+                        <div class="card-body" id="analyticsByGroup" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header"><div class="card-title">Uptime Overview</div></div>
+                    <div class="card-body" id="analyticsUptime" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Webhooks Tab -->
+            <div id="tab-webhooks" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Webhooks</div>
+                        <button class="btn btn-primary" onclick="addWebhook()"><i class="fas fa-plus"></i> Add Webhook</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="webhooksList" style="color: #737373; font-size: 0.875rem;">No webhooks configured. Add webhooks to receive events on server status changes.</div>
+                    </div>
+                </div>
+            </div>
                 <div class="grid-2" style="margin-top: 1.5rem;">
                     <div class="card">
                         <div class="card-header">
