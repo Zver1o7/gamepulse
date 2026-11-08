@@ -127,8 +127,11 @@
             <header class="topbar">
                 <div class="topbar-title" id="pageTitle">Overview</div>
                 <div class="topbar-actions">
-                    <button class="btn" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                    <button class="btn btn-primary" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Server</button>
+                    <button class="btn" onclick="toggleTheme()" title="Toggle theme (T)"><i class="fas fa-moon"></i></button>
+                    <button class="btn" onclick="showNotifications()" title="Notifications (N)"><i class="fas fa-bell"></i><span id="notifCount" style="background:#ef4444;color:#fff;border-radius:9px;padding:0 5px;font-size:0.6875rem;margin-left:2px;display:none;">0</span></button>
+                    <button class="btn" onclick="refreshAll()" title="Refresh (R)"><i class="fas fa-sync-alt"></i></button>
+                    <button class="btn" onclick="exportCSV()" title="Export CSV"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="btn btn-primary" onclick="showAddModal()" title="Add server (A)"><i class="fas fa-plus"></i> Add Server</button>
                     <button class="btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
             </header>
@@ -208,6 +211,19 @@
                             <select id="historyServerSelect" class="form-input" style="width: 200px;" onchange="loadServerHistory()"></select>
                         </div>
                         <div class="card-body"><canvas id="uptimeChart" height="200"></canvas><div id="historyInfo" style="margin-top: 0.75rem; color: #737373; font-size: 0.8125rem;"></div></div>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1.5rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Ping / Latency History</div>
+                            <select id="pingServerSelect" class="form-input" style="width: 200px;" onchange="loadPingHistory()"></select>
+                        </div>
+                        <div class="card-body"><canvas id="pingChart" height="200"></canvas><div id="pingInfo" style="margin-top: 0.75rem; color: #737373; font-size: 0.8125rem;"></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Players Over Time</div></div>
+                        <div class="card-body"><canvas id="playersChart" height="200"></canvas></div>
                     </div>
                 </div>
                 <div class="card" style="margin-top: 1.5rem;">
@@ -371,6 +387,7 @@
                         <select id="groupFilter" class="form-input" style="width: 180px;" onchange="filterServers()"><option value="">All Groups</option></select>
                         <select id="statusFilter" class="form-input" style="width: 150px;" onchange="filterServers()"><option value="">All Status</option><option value="online">Online</option><option value="offline">Offline</option></select>
                         <select id="typeFilter" class="form-input" style="width: 150px;" onchange="filterServers()"><option value="">All Types</option></select>
+                        <label style="display: flex; align-items: center; gap: 0.375rem; color: #a3a3a3; font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="favOnly" onchange="filterServers()"> Favorites only</label>
                     </div>
                     <div style="padding: 1.5rem;">
                         <div id="adminServers" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
@@ -600,6 +617,38 @@
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;"><i class="fas fa-save"></i> Save Server</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="notifPanel" class="modal" onclick="if(event.target===this)closeNotifications()">
+        <div class="modal-content" style="max-width: 460px;">
+            <div class="modal-header">
+                <div style="font-size: 1rem; font-weight: 600; color: #e5e5e5;">Notifications</div>
+                <button class="modal-close" onclick="closeNotifications()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="notifList" style="display: flex; flex-direction: column; gap: 0.5rem;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shortcutModal" class="modal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <div style="font-size: 1rem; font-weight: 600; color: #e5e5e5;">Keyboard Shortcuts</div>
+                <button class="modal-close" onclick="document.getElementById('shortcutModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 0.625rem;">
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Add server</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">A</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Refresh</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">R</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Notifications</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">N</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Toggle theme</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">T</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Focus search</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">/</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Shortcuts help</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">?</kbd></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Close modal</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">Esc</kbd></div>
+                </div>
             </div>
         </div>
     </div>

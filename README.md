@@ -78,6 +78,14 @@
 - **User Authentication** - Secure login for admin panel with session tokens
 - **Uptime History & Graphs** - Visual charts showing server uptime over time
 - **Advanced Analytics** - Charts for server types, groups, status distribution
+- **Ping / Latency Graphs** - Track network latency per server
+- **Players Over Time** - Player count trend chart in analytics
+- **Favorites** - Star servers and filter to favorites only
+- **CSV Export** - Export the whole server list as CSV in one click
+- **Notifications Center** - Live badge + panel for offline servers
+- **Keyboard Shortcuts** - A / R / N / T / `/` / `?` / Esc in the admin panel
+- **Dark & Light Theme Toggle** - Saved to localStorage
+- **Health Check Endpoint** - Public `/health` for uptime monitoring services
 - **Modern Admin Panel** - Sleek sidebar design with 150+ functions
 - **Reports & Insights** - Generate system reports and statistics
 - **Server Descriptions & Tags** - Rich metadata for every server
@@ -243,6 +251,11 @@ pm2 startup
 | `/api/auth/login` | POST | Admin login |
 | `/api/auth/me` | GET | Current session info |
 | `/status/:id` | GET | Public status page |
+| `/health` | GET | Health/version check (public) |
+| `/admin/export.csv` | GET | Export servers as CSV |
+| `/admin/favorites` | GET/POST | Toggle favorites |
+| `/admin/ping/:id` | GET | Ping history for a server |
+| `/admin/notifications` | GET | Notifications center |
 | `/admin/*` | GET/POST/PUT/DELETE | Admin API (requires auth) |
 
 See `/docs.html` for more details.
@@ -282,6 +295,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] Public status pages
 - [x] Webhooks & integrations
 - [x] Alert rules & maintenance
+- [x] Ping / latency graphs
+- [x] Favorites & CSV export
+- [x] Notifications center
+- [x] Keyboard shortcuts & theme toggle
+- [x] Health check endpoint
 - [ ] Multi-user roles & permissions
 - [ ] Scheduled reports & email notifications
 - [ ] Mobile app

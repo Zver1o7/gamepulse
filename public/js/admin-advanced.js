@@ -125,6 +125,7 @@ function renderServers(servers) {
             </div>
             <div style="color: #e5e5e5; font-size: 0.875rem;">${server.players||0} / ${server.maxplayers||'?'}</div>
             <div style="display: flex; gap: 0.375rem;">
+                <button class="btn" style="padding: 0.375rem 0.625rem; color:${(window._fav||[]).includes(server.id)?'#f59e0b':''};" onclick="toggleFavorite('${server.id}', event)" title="Favorite"><i class="fas fa-star"></i></button>
                 <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="viewServer('${server.id}')" title="View"><i class="fas fa-eye"></i></button>
                 <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="editServerModal('${server.id}')" title="Edit"><i class="fas fa-edit"></i></button>
                 <button class="btn" style="padding: 0.375rem 0.625rem;" onclick="cloneServer('${server.id}')" title="Clone"><i class="fas fa-copy"></i></button>
@@ -173,11 +174,14 @@ function filterServers() {
     const group = document.getElementById('groupFilter')?.value || '';
     const status = document.getElementById('statusFilter')?.value || '';
     const type = document.getElementById('typeFilter')?.value || '';
+    const favOnly = document.getElementById('favOnly')?.checked;
+    const favs = window._fav || [];
     document.querySelectorAll('#adminServers .server-card').forEach(card => {
         const match = card.dataset.name.includes(search) && 
                       (group === '' || card.dataset.group === group) &&
                       (status === '' || card.dataset.status === status) &&
-                      (type === '' || card.dataset.type === type);
+                      (type === '' || card.dataset.type === type) &&
+                      (!favOnly || favs.includes(card.dataset.id));
         card.style.display = match ? 'grid' : 'none';
     });
 }
@@ -355,6 +359,13 @@ window.loadAnalytics = async () => {
             sel.innerHTML = allServers.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
             loadServerHistory();
         }
+        const psel = document.getElementById('pingServerSelect');
+        if (psel && allServers.length) {
+            psel.innerHTML = allServers.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+            loadPingHistory();
+        }
+        loadPlayersChart();
+        updateNotifBadge();
     } catch(e) {
         console.error(e);
     }
@@ -392,6 +403,125 @@ window.logout = async () => {
     localStorage.removeItem('gp_user');
     window.location.href = '/login.html';
 };
+
+// ===== v3.0.0 features =====
+
+window.exportCSV = () => {
+    window.open('/admin/export.csv', '_blank');
+};
+
+window.toggleTheme = () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('gp_theme', next);
+    applyTheme(next);
+};
+
+function applyTheme(theme) {
+    const root = document.documentElement;
+    if (theme === 'light') {
+        root.style.setProperty('--bg-main', '#f5f5f5');
+        root.style.background = '#f5f5f5';
+        document.body.style.background = '#f5f5f5';
+        document.querySelectorAll('.sidebar, .main-content').forEach(e => e.style.background = '#fafafa');
+        document.querySelectorAll('.card, .stat-card').forEach(e => { e.style.background = '#fff'; e.style.borderColor = '#e5e5e5'; });
+        document.querySelectorAll('.card-header').forEach(e => e.style.borderColor = '#e5e5e5');
+        document.querySelectorAll('.topbar').forEach(e => { e.style.background = 'rgba(250,250,250,0.9)'; e.style.borderColor = '#e5e5e5'; });
+        document.querySelectorAll('.topbar-title, .card-title, .stat-value').forEach(e => e.style.color = '#171717');
+        document.querySelectorAll('.form-input').forEach(e => { e.style.background = '#fff'; e.style.borderColor = '#e5e5e5'; e.style.color = '#171717'; });
+    } else {
+        document.body.style.background = '#0a0a0a';
+        document.querySelectorAll('.sidebar').forEach(e => e.style.background = '');
+        document.querySelectorAll('.main-content').forEach(e => e.style.background = '#0a0a0a');
+        document.querySelectorAll('.card, .stat-card').forEach(e => { e.style.background = ''; e.style.borderColor = ''; });
+        document.querySelectorAll('.topbar').forEach(e => { e.style.background = ''; e.style.borderColor = ''; });
+        document.querySelectorAll('.topbar-title, .card-title, .stat-value').forEach(e => e.style.color = '');
+        document.querySelectorAll('.form-input').forEach(e => { e.style.background = ''; e.style.borderColor = ''; e.style.color = ''; });
+    }
+}
+
+window.showNotifications = async () => {
+    document.getElementById('notifPanel').classList.add('active');
+    const div = document.getElementById('notifList');
+    div.innerHTML = 'Loading...';
+    try {
+        const res = await fetch(`${API_BASE}/notifications`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const data = await res.json();
+        const items = data.notifications || [];
+        div.innerHTML = items.length ? items.map(n => `
+            <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;">
+                <div style="color:#e5e5e5;font-size:0.875rem;font-weight:500;">${escapeHtml(n.server)}</div>
+                <div style="color:#a3a3a3;font-size:0.75rem;margin-top:0.25rem;">${escapeHtml(n.message)}</div>
+                <div style="color:#525252;font-size:0.6875rem;margin-top:0.25rem;">${new Date(n.time).toLocaleString()}</div>
+            </div>
+        `).join('') : '<div style="color:#737373;">No notifications — all servers are online 🎉</div>';
+    } catch(e) { div.innerHTML = 'Failed to load'; }
+};
+
+window.closeNotifications = () => document.getElementById('notifPanel').classList.remove('active');
+
+window.loadPingHistory = async () => {
+    const id = document.getElementById('pingServerSelect')?.value;
+    if (!id) return;
+    try {
+        const res = await fetch(`${API_BASE}/ping/${id}`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const data = await res.json();
+        const hist = data.history && data.history.length ? data.history : [data.current || 0];
+        renderChart('pingChart', 'line', hist.map((_,i)=>`#${i+1}`), hist, ['#f59e0b']);
+        document.getElementById('pingInfo').textContent = `Current: ${data.current} ms • ${hist.length} samples`;
+    } catch(e) { document.getElementById('pingInfo').textContent = 'No ping data'; }
+};
+
+window.loadPlayersChart = () => {
+    const hist = (window._playersHist ||= []);
+    const pts = allServers.reduce((a,s)=>a+(parseInt(s.players)||0),0);
+    hist.push(pts);
+    if (hist.length > 20) hist.shift();
+    renderChart('playersChart', 'line', hist.map((_,i)=>`#${i+1}`), hist, ['#3b82f6']);
+};
+
+async function loadFavorites() {
+    try {
+        const res = await fetch(`${API_BASE}/favorites`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const data = await res.json();
+        window._fav = data.favorites || [];
+    } catch(e) { window._fav = []; }
+}
+
+window.toggleFavorite = async (id, evt) => {
+    if (evt) evt.stopPropagation();
+    await fetch(`${API_BASE}/favorites`, { method: 'POST', headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await loadFavorites();
+    fetchServers();
+};
+
+async function updateNotifBadge() {
+    try {
+        const res = await fetch(`${API_BASE}/notifications`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const data = await res.json();
+        const n = (data.notifications || []).length;
+        const el = document.getElementById('notifCount');
+        if (el) { el.textContent = n; el.style.display = n > 0 ? 'inline-block' : 'none'; }
+    } catch(e) {}
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        if (e.key === 'Escape') e.target.blur();
+        return;
+    }
+    switch (e.key.toLowerCase()) {
+        case 'a': showAddModal(); break;
+        case 'r': refreshAll(); break;
+        case 'n': showNotifications(); break;
+        case 't': toggleTheme(); break;
+        case '/': e.preventDefault(); document.getElementById('serverSearch')?.focus(); break;
+        case '?': document.getElementById('shortcutModal')?.classList.add('active'); break;
+        case 'escape': closeNotifications(); document.getElementById('addModal')?.classList.remove('active'); document.getElementById('shortcutModal')?.classList.remove('active'); break;
+    }
+});
 
 window.addWebhook = async () => {
     const url = prompt('Webhook URL:');
@@ -683,9 +813,14 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
 
 (async () => {
     if (await checkAuth()) {
+        const savedTheme = localStorage.getItem('gp_theme') || 'dark';
+        if (savedTheme === 'light') applyTheme('light');
+        await loadFavorites();
         fetchServers();
         setInterval(fetchServers, 30000);
         loadSystem();
         setInterval(loadSystem, 1000);
+        updateNotifBadge();
+        setInterval(updateNotifBadge, 45000);
     }
 })();

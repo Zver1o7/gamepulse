@@ -1,4 +1,4 @@
-import GameDig from 'gamedig';
+import { GameDig } from 'gamedig';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

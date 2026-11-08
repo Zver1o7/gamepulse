@@ -1,7 +1,7 @@
 {
   "name": "gamepulse",
-  "version": "2.6.0",
-  "description": "Game server monitor with user auth, uptime history graphs, advanced charts & analytics, modern admin, RCON, webhooks, alerts, reports. By Zver1o7"
+  "version": "3.0.0",
+  "description": "Game server monitor: user auth, uptime/ping graphs, advanced charts, favorites, CSV export, notifications, keyboard shortcuts, health checks, RCON, webhooks, status pages. By Zver1o7",
   "main": "src/server.js",
   "type": "module",
   "scripts": {

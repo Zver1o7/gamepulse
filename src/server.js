@@ -75,6 +75,78 @@ app.get('/admin/users', (req, res) => {
   res.json({ users: [{ username: ADMIN_USER, role: 'admin', active: true }] });
 });
 
+// Favorites store
+const FAV_PATH = join(__dirname, '../config/favorites.json');
+let favorites = [];
+try { if (fs.existsSync(FAV_PATH)) favorites = JSON.parse(fs.readFileSync(FAV_PATH, 'utf8')); } catch (e) { favorites = []; }
+
+app.get('/admin/favorites', (req, res) => res.json({ favorites }));
+
+app.post('/admin/favorites', express.json(), (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: 'id required' });
+  if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+  else favorites.push(id);
+  try { fs.writeFileSync(FAV_PATH, JSON.stringify(favorites, null, 2)); } catch (e) {}
+  res.json({ favorites });
+});
+
+// CSV export
+app.get('/admin/export.csv', (req, res) => {
+  const servers = monitor.getServers();
+  const header = 'Name,Type,Host,Port,Status,Players,MaxPlayers,Uptime,Group\n';
+  const rows = servers.map(s =>
+    [`"${s.name}"`, s.type, s.host, s.port, s.status, s.players || 0, s.maxplayers || '?', (s.uptime || 0) + '%', `"${s.group || ''}"`].join(',')
+  ).join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename=servers.csv');
+  res.send(header + rows);
+});
+
+// Ping history
+app.get('/admin/ping/:id', (req, res) => {
+  const servers = monitor.getServers();
+  const server = servers.find(s => s.id === req.params.id);
+  if (!server) return res.status(404).json({ error: 'Not found' });
+  const history = monitor.getHistory(req.params.id) || [];
+  res.json({ current: server.ping || 0, history: history.slice(-40).map(h => h.ping || 0) });
+});
+
+// Health check endpoint (public)
+app.get('/health', (req, res) => {
+  const servers = monitor.getServers();
+  let version = 'unknown';
+  try { version = JSON.parse(fs.readFileSync(join(__dirname, '../package.json'), 'utf8')).version; } catch (e) {}
+  res.json({
+    status: 'ok',
+    version,
+    uptime: process.uptime(),
+    servers: {
+      total: servers.length,
+      online: servers.filter(s => s.status === 'online').length
+    }
+  });
+});
+
+// Notifications center (admin)
+app.get('/admin/notifications', (req, res) => {
+  const servers = monitor.getServers();
+  const notifications = servers
+    .filter(s => s.status !== 'online')
+    .map(s => ({ type: 'warning', server: s.name, message: `${s.name} is ${s.status}`, time: new Date().toISOString() }));
+  res.json({ notifications });
+});
+
+// Quick stats history (for sparkline charts)
+app.get('/admin/sparkline', (req, res) => {
+  const servers = monitor.getServers();
+  res.json({
+    players: servers.reduce((a, s) => a + (parseInt(s.players) || 0), 0),
+    online: servers.filter(s => s.status === 'online').length,
+    total: servers.length
+  });
+});
+
 app.use('/admin', (req, res, next) => {
   const auth = req.headers.authorization?.replace('Bearer ', '');
   if (req.path === '/login') return next();
