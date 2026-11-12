@@ -11,3 +11,6 @@ coverage/
 .env.local
 .env.production
 private/
+
+gp_out.txt
+gp_err.txt
