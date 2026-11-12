@@ -147,6 +147,142 @@ app.get('/admin/sparkline', (req, res) => {
   });
 });
 
+// Rate limiting for public API (simple in-memory)
+const rateBuckets = new Map();
+function rateLimit(maxPerMin = 60) {
+  return (req, res, next) => {
+    const ip = req.ip || 'unknown';
+    const now = Date.now();
+    const bucket = rateBuckets.get(ip) || [];
+    const recent = bucket.filter(t => now - t < 60000);
+    if (recent.length >= maxPerMin) {
+      return res.status(429).json({ error: 'Too many requests, slow down' });
+    }
+    recent.push(now);
+    rateBuckets.set(ip, recent);
+    next();
+  };
+}
+app.use('/api', rateLimit(120));
+app.use('/admin', rateLimit(240));
+
+// Server notes storage
+const NOTES_PATH = join(__dirname, '../config/notes.json');
+let notes = {};
+try { if (fs.existsSync(NOTES_PATH)) notes = JSON.parse(fs.readFileSync(NOTES_PATH, 'utf8')); } catch (e) { notes = {}; }
+
+app.get('/admin/notes/:id', (req, res) => res.json({ notes: notes[req.params.id] || [] }));
+
+app.post('/admin/notes/:id', express.json(), (req, res) => {
+  if (!req.body.text) return res.status(400).json({ error: 'text required' });
+  notes[req.params.id] = notes[req.params.id] || [];
+  notes[req.params.id].unshift({ text: req.body.text, time: new Date().toISOString() });
+  if (notes[req.params.id].length > 50) notes[req.params.id].length = 50;
+  try { fs.writeFileSync(NOTES_PATH, JSON.stringify(notes, null, 2)); } catch (e) {}
+  res.json({ notes: notes[req.params.id] });
+});
+
+app.delete('/admin/notes/:id/:idx', (req, res) => {
+  const list = notes[req.params.id] || [];
+  list.splice(parseInt(req.params.idx), 1);
+  notes[req.params.id] = list;
+  try { fs.writeFileSync(NOTES_PATH, JSON.stringify(notes, null, 2)); } catch (e) {}
+  res.json({ notes: list });
+});
+
+// Detailed server view
+app.get('/admin/server/:id/detail', (req, res) => {
+  const servers = monitor.getServers();
+  const server = servers.find(s => s.id === req.params.id);
+  if (!server) return res.status(404).json({ error: 'Not found' });
+  const history = monitor.getHistory(req.params.id) || [];
+  res.json({
+    server,
+    history: history.slice(-100),
+    notes: notes[req.params.id] || []
+  });
+});
+
+// Uptime heatmap data (last 30 days buckets from history)
+app.get('/admin/server/:id/heatmap', (req, res) => {
+  const history = monitor.getHistory(req.params.id) || [];
+  const buckets = [];
+  const now = Date.now();
+  for (let i = 29; i >= 0; i--) {
+    const start = now - (i + 1) * 86400000;
+    const end = now - i * 86400000;
+    const inBucket = history.filter(h => {
+      const t = new Date(h.time || h.timestamp || 0).getTime();
+      return t >= start && t < end;
+    });
+    const up = inBucket.filter(h => h.online).length;
+    buckets.push({
+      day: new Date(end).toISOString().slice(0, 10),
+      total: inBucket.length,
+      up,
+      pct: inBucket.length ? Math.round((up / inBucket.length) * 100) : null
+    });
+  }
+  res.json({ buckets });
+});
+
+// Webhook test
+app.post('/admin/webhooks/test', express.json(), async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ error: 'url required' });
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 5000);
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'gamepulse', event: 'test', message: 'GamePulse test webhook', time: new Date().toISOString() }),
+      signal: controller.signal
+    });
+    clearTimeout(t);
+    res.json({ success: r.ok, status: r.status });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// Scheduled reports (generate and store history)
+const REPORTS_PATH = join(__dirname, '../config/reports.json');
+let reports = [];
+try { if (fs.existsSync(REPORTS_PATH)) reports = JSON.parse(fs.readFileSync(REPORTS_PATH, 'utf8')); } catch (e) { reports = []; }
+
+function generateReport() {
+  const servers = monitor.getServers();
+  const report = {
+    time: new Date().toISOString(),
+    total: servers.length,
+    online: servers.filter(s => s.status === 'online').length,
+    players: servers.reduce((a, s) => a + (parseInt(s.players) || 0), 0),
+    uptimeAvg: servers.length ? Math.round(servers.reduce((a, s) => a + (s.uptime || 0), 0) / servers.length) : 0
+  };
+  reports.unshift(report);
+  if (reports.length > 90) reports.length = 90;
+  try { fs.writeFileSync(REPORTS_PATH, JSON.stringify(reports, null, 2)); } catch (e) {}
+  return report;
+}
+
+setInterval(generateReport, 6 * 3600000); // every 6 hours
+app.get('/admin/reports/history', (req, res) => res.json({ reports }));
+
+app.post('/admin/reports/generate', (req, res) => res.json({ report: generateReport() }));
+
+// Server comparison
+app.get('/admin/compare', (req, res) => {
+  const ids = (req.query.ids || '').split(',').filter(Boolean);
+  const servers = monitor.getServers().filter(s => ids.includes(s.id));
+  res.json(servers.map(s => ({
+    id: s.id, name: s.name, type: s.type, status: s.status,
+    players: s.players || 0, maxplayers: s.maxplayers || 0,
+    ping: s.ping || 0, uptime: s.uptime || 0, map: s.map || '',
+    group: s.group || '', description: s.description || ''
+  })));
+});
+
 app.use('/admin', (req, res, next) => {
   const auth = req.headers.authorization?.replace('Bearer ', '');
   if (req.path === '/login') return next();

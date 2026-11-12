@@ -36,6 +36,7 @@ function switchTab(tab, evt) {
         overview: 'Overview',
         analytics: 'Analytics',
         reports: 'Reports',
+        compare: 'Compare Servers',
         servers: 'Servers',
         groups: 'Groups',
         tags: 'Tags',
@@ -65,7 +66,8 @@ function switchTab(tab, evt) {
     if (tab === 'groups') loadGroups();
     if (tab === 'tags') loadTags();
     if (tab === 'analytics') loadAnalytics();
-    if (tab === 'reports') loadReports();
+    if (tab === 'reports') { loadReports(); loadReportHistory(); }
+    if (tab === 'compare') loadComparePicker();
     if (tab === 'integrations') loadIntegrations();
     if (tab === 'templates') loadTemplates();
     if (tab === 'alerts') loadAlerts();
@@ -243,10 +245,90 @@ window.editServerModal = async (id) => {
     document.getElementById('addModal').classList.add('active');
 };
 
-window.viewServer = (id) => {
-    const server = allServers.find(s => s.id === id);
-    if (!server) return;
-    alert(`Name: ${server.name}\nType: ${server.type}\nHost: ${server.host}:${server.port}\nStatus: ${server.status}\nPlayers: ${server.players}/${server.maxplayers}\nGroup: ${server.group||'-'}\nDescription: ${server.description||'-'}\nNotes: ${server.notes||'-'}`);
+window.viewServer = async (id) => {
+    window._detailId = id;
+    document.getElementById('serverDetailModal').classList.add('active');
+    switchDetailTab('info');
+    loadDetail('info', id);
+};
+
+window.closeServerDetail = () => {
+    document.getElementById('serverDetailModal').classList.remove('active');
+    window._detailId = null;
+};
+
+window.switchDetailTab = (tab, evt) => {
+    document.querySelectorAll('#serverDetailModal .nav-item').forEach(t => t.classList.remove('active'));
+    if (evt) evt.currentTarget.classList.add('active');
+    document.querySelectorAll('.detail-tab').forEach(t => t.style.display = 'none');
+    const el = document.getElementById(`detail-${tab}`);
+    if (el) el.style.display = 'block';
+    if (window._detailId) loadDetail(tab, window._detailId);
+};
+
+async function loadDetail(tab, id) {
+    try {
+        const res = await fetch(`${API_BASE}/server/${id}/detail`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        const s = data.server;
+        document.getElementById('detailTitle').textContent = s.name;
+
+        if (tab === 'info') {
+            document.getElementById('detail-info').innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Status</div><div style="color:${s.status==='online'?'#22c55e':'#ef4444'};font-weight:500;margin-top:0.25rem;">${s.status||'unknown'}</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Players</div><div style="color:#e5e5e5;font-weight:500;margin-top:0.25rem;">${s.players||0} / ${s.maxplayers||'?'}</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Address</div><div style="color:#e5e5e5;font-weight:500;margin-top:0.25rem;font-family:monospace;font-size:0.8125rem;">${escapeHtml(s.host)}:${s.port}</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Type / Game</div><div style="color:#e5e5e5;font-weight:500;margin-top:0.25rem;">${escapeHtml(s.type)}${s.game?' • '+escapeHtml(s.game):''}</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Uptime</div><div style="color:#e5e5e5;font-weight:500;margin-top:0.25rem;">${s.uptime||0}%</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;"><div style="color:#737373;font-size:0.75rem;">Map</div><div style="color:#e5e5e5;font-weight:500;margin-top:0.25rem;">${escapeHtml(s.map||'-')}</div></div>
+                    <div style="padding:0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;grid-column:1/-1;"><div style="color:#737373;font-size:0.75rem;">Description</div><div style="color:#a3a3a3;margin-top:0.25rem;font-size:0.875rem;">${escapeHtml(s.description||'No description')}</div></div>
+                    ${s.players_list&&s.players_list.length?`<div style="grid-column:1/-1;"><div style="color:#737373;font-size:0.75rem;margin-bottom:0.5rem;">Players Online (${s.players_list.length})</div><div style="display:flex;flex-wrap:wrap;gap:0.375rem;">${s.players_list.slice(0,30).map(p=>`<span style="padding:0.25rem 0.5rem;background:#161616;border:1px solid #262626;border-radius:6px;font-size:0.75rem;color:#e5e5e5;">${escapeHtml(typeof p==='string'?p:(p.name||''))}</span>`).join('')}</div></div>`:''}
+                </div>`;
+        } else if (tab === 'uptime') {
+            const hist = data.history || [];
+            const labels = hist.slice(-30).map((_,i)=>`#${i+1}`);
+            const vals = hist.slice(-30).map(h=>h.online?100:0);
+            renderChart('detailUptimeChart', 'line', labels, vals, ['#22c55e']);
+            document.getElementById('detailUptimeInfo').textContent = hist.length ? `${hist.length} data points • Uptime ${s.uptime||0}%` : 'No history yet — collecting data...';
+        } else if (tab === 'heatmap') {
+            const hm = await (await fetch(`${API_BASE}/server/${id}/heatmap`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } })).json();
+            const colors = pct => pct===null?'#161616':pct>=99?'#22c55e':pct>=90?'#84cc16':pct>=70?'#f59e0b':pct>=50?'#f97316':'#ef4444';
+            document.getElementById('detailHeatmap').innerHTML = (hm.buckets||[]).map(b=>`<div title="${b.day}: ${b.pct===null?'no data':b.pct+'%'} (${b.up}/${b.total})" style="width:20px;height:20px;border-radius:4px;background:${colors(b.pct)};cursor:default;"></div>`).join('');
+            const withData = (hm.buckets||[]).filter(b=>b.pct!==null);
+            const avg = withData.length ? Math.round(withData.reduce((a,b)=>a+b.pct,0)/withData.length) : null;
+            document.getElementById('detailHeatmapInfo').textContent = avg!==null ? `30-day average uptime: ${avg}%` : 'No data for the last 30 days yet';
+        } else if (tab === 'notes') {
+            renderNotes(data.notes || []);
+        }
+    } catch(e) { console.error(e); }
+}
+
+function renderNotes(list) {
+    document.getElementById('notesList').innerHTML = list.length ? list.map((n,i)=>`
+        <div style="display:flex;justify-content:space-between;gap:0.5rem;padding:0.625rem 0.75rem;background:#0a0a0a;border:1px solid #1f1f1f;border-radius:8px;">
+            <div><div style="color:#e5e5e5;font-size:0.8125rem;">${escapeHtml(n.text)}</div><div style="color:#525252;font-size:0.6875rem;margin-top:0.25rem;">${new Date(n.time).toLocaleString()}</div></div>
+            <button class="btn" style="padding:0.25rem 0.5rem;" onclick="deleteNote(${i})"><i class="fas fa-trash"></i></button>
+        </div>
+    `).join('') : '<div style="color:#737373;">No notes yet</div>';
+}
+
+window.addNote = async () => {
+    const input = document.getElementById('noteInput');
+    const text = input.value.trim();
+    if (!text || !window._detailId) return;
+    const res = await fetch(`${API_BASE}/notes/${window._detailId}`, { method:'POST', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'}, body: JSON.stringify({ text }) });
+    const data = await res.json();
+    renderNotes(data.notes || []);
+    input.value = '';
+};
+
+window.deleteNote = async (idx) => {
+    if (!window._detailId) return;
+    const res = await fetch(`${API_BASE}/notes/${window._detailId}/${idx}`, { method:'DELETE', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`} });
+    const data = await res.json();
+    renderNotes(data.notes || []);
 };
 
 window.moveServer = (id) => {
@@ -481,6 +563,69 @@ window.loadPlayersChart = () => {
     renderChart('playersChart', 'line', hist.map((_,i)=>`#${i+1}`), hist, ['#3b82f6']);
 };
 
+// ===== v3.1.0 features =====
+
+window.loadComparePicker = () => {
+    const div = document.getElementById('comparePicker');
+    if (!div) return;
+    window._compareSel = window._compareSel || [];
+    div.innerHTML = allServers.map(s => {
+        const on = window._compareSel.includes(s.id);
+        return `<label style="display:flex;align-items:center;gap:0.375rem;padding:0.5rem 0.75rem;background:${on?'rgba(59,130,246,0.15)':'#0a0a0a'};border:1px solid ${on?'#3b82f6':'#1f1f1f'};border-radius:8px;cursor:pointer;font-size:0.8125rem;color:#e5e5e5;">
+            <input type="checkbox" ${on?'checked':''} onchange="toggleCompare('${s.id}')"> ${escapeHtml(s.name)}
+        </label>`;
+    }).join('');
+};
+
+window.toggleCompare = (id) => {
+    window._compareSel = window._compareSel || [];
+    if (window._compareSel.includes(id)) window._compareSel = window._compareSel.filter(x => x !== id);
+    else window._compareSel.push(id);
+    loadComparePicker();
+};
+
+window.loadCompare = async () => {
+    const sel = window._compareSel || [];
+    const out = document.getElementById('compareResult');
+    if (sel.length < 2) { out.innerHTML = '<span style="color:#737373;font-size:0.875rem;">Select at least 2 servers.</span>'; return; }
+    try {
+        const res = await fetch(`${API_BASE}/compare?ids=${sel.join(',')}`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const rows = await res.json();
+        const metrics = [
+            ['Status', s => `<span class="badge ${s.status==='online'?'badge-green':'badge-red'}">${s.status}</span>`],
+            ['Players', s => `${s.players} / ${s.maxplayers}`],
+            ['Uptime', s => `${s.uptime}%`],
+            ['Ping', s => `${s.ping} ms`],
+            ['Type', s => escapeHtml(s.type)],
+            ['Map', s => escapeHtml(s.map || '-')],
+            ['Group', s => escapeHtml(s.group || '-')]
+        ];
+        out.innerHTML = `<table class="table"><thead><tr><th>Metric</th>${rows.map(r=>`<th>${escapeHtml(r.name)}</th>`).join('')}</tr></thead><tbody>
+            ${metrics.map(([label, fn]) => `<tr><td style="color:#737373;">${label}</td>${rows.map(r=>`<td>${fn(r)}</td>`).join('')}</tr>`).join('')}
+        </tbody></table>`;
+    } catch(e) { out.innerHTML = '<span style="color:#ef4444;">Failed to compare</span>'; }
+};
+
+window.loadReportHistory = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/reports/history`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
+        const data = await res.json();
+        const list = data.reports || [];
+        document.getElementById('reportHistory').innerHTML = list.length ? `
+            <table class="table">
+                <thead><tr><th>Time</th><th>Total</th><th>Online</th><th>Players</th><th>Avg Uptime</th></tr></thead>
+                <tbody>${list.slice(0, 20).map(r => `<tr><td>${new Date(r.time).toLocaleString()}</td><td>${r.total}</td><td style="color:#22c55e;">${r.online}</td><td>${r.players}</td><td>${r.uptimeAvg}%</td></tr>`).join('')}</tbody>
+            </table>` : '<span style="color:#737373;">No reports yet — auto-generated every 6 hours.</span>';
+    } catch(e) { console.error(e); }
+};
+
+window.testWebhook = async (url) => {
+    if (!url) return;
+    const res = await fetch(`${API_BASE}/webhooks/test`, { method:'POST', headers:{'Authorization':`Bearer ${AUTH_TOKEN}`,'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
+    const data = await res.json();
+    alert(data.success ? `Success! HTTP ${data.status}` : `Failed: ${data.error || 'HTTP ' + data.status}`);
+};
+
 async function loadFavorites() {
     try {
         const res = await fetch(`${API_BASE}/favorites`, { headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` } });
@@ -519,7 +664,7 @@ document.addEventListener('keydown', (e) => {
         case 't': toggleTheme(); break;
         case '/': e.preventDefault(); document.getElementById('serverSearch')?.focus(); break;
         case '?': document.getElementById('shortcutModal')?.classList.add('active'); break;
-        case 'escape': closeNotifications(); document.getElementById('addModal')?.classList.remove('active'); document.getElementById('shortcutModal')?.classList.remove('active'); break;
+        case 'escape': closeNotifications(); closeServerDetail(); document.getElementById('addModal')?.classList.remove('active'); document.getElementById('shortcutModal')?.classList.remove('active'); break;
     }
 });
 

@@ -78,6 +78,13 @@
 - **User Authentication** - Secure login for admin panel with session tokens
 - **Uptime History & Graphs** - Visual charts showing server uptime over time
 - **Advanced Analytics** - Charts for server types, groups, status distribution
+- **Server Detail View** - Modal with tabs: info, uptime graph, 30-day heatmap, notes
+- **30-Day Uptime Heatmap** - GitHub-style daily uptime grid per server
+- **Server Comparison** - Side-by-side comparison of selected servers
+- **Server Notes** - Per-server note timeline, stored on disk
+- **Scheduled Reports** - Auto-generated every 6h with full history
+- **Webhook Testing** - Test any webhook URL directly from admin
+- **API Rate Limiting** - 120 req/min public, 240 req/min admin per IP
 - **Ping / Latency Graphs** - Track network latency per server
 - **Players Over Time** - Player count trend chart in analytics
 - **Favorites** - Star servers and filter to favorites only
@@ -256,6 +263,13 @@ pm2 startup
 | `/admin/favorites` | GET/POST | Toggle favorites |
 | `/admin/ping/:id` | GET | Ping history for a server |
 | `/admin/notifications` | GET | Notifications center |
+| `/admin/server/:id/detail` | GET | Full server detail (history + notes) |
+| `/admin/server/:id/heatmap` | GET | 30-day uptime heatmap data |
+| `/admin/notes/:id` | GET/POST | Server notes |
+| `/admin/compare?ids=` | GET | Compare servers side-by-side |
+| `/admin/reports/history` | GET | Report history |
+| `/admin/reports/generate` | POST | Generate report now |
+| `/admin/webhooks/test` | POST | Test a webhook URL |
 | `/admin/*` | GET/POST/PUT/DELETE | Admin API (requires auth) |
 
 See `/docs.html` for more details.
@@ -300,6 +314,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] Notifications center
 - [x] Keyboard shortcuts & theme toggle
 - [x] Health check endpoint
+- [x] Server detail view with tabs
+- [x] 30-day uptime heatmap
+- [x] Server comparison tool
+- [x] Server notes
+- [x] Scheduled reports (6h auto)
+- [x] Webhook testing
+- [x] API rate limiting
 - [ ] Multi-user roles & permissions
 - [ ] Scheduled reports & email notifications
 - [ ] Mobile app

@@ -85,6 +85,7 @@
                     <button class="nav-item active" onclick="switchTab('overview', event)"><i class="fas fa-chart-pie"></i> Overview</button>
                     <button class="nav-item" onclick="switchTab('analytics', event)"><i class="fas fa-chart-bar"></i> Analytics</button>
                     <button class="nav-item" onclick="switchTab('reports', event)"><i class="fas fa-file-contract"></i> Reports</button>
+                    <button class="nav-item" onclick="switchTab('compare', event)"><i class="fas fa-balance-scale"></i> Compare</button>
                     <button class="nav-item" onclick="switchTab('servers', event)"><i class="fas fa-server"></i> Servers</button>
                 </div>
                 <div class="nav-section">
@@ -240,6 +241,27 @@
                         <button class="btn btn-primary" onclick="loadReports()"><i class="fas fa-sync"></i> Generate Report</button>
                     </div>
                     <div class="card-body" id="reportsContent" style="color: #737373; font-size: 0.875rem;">Click Generate Report to view statistics.</div>
+                </div>
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header">
+                        <div class="card-title">Report History (auto every 6h)</div>
+                        <button class="btn" onclick="loadReportHistory()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div class="card-body" id="reportHistory" style="color: #737373; font-size: 0.875rem;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Compare Tab -->
+            <div id="tab-compare" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Compare Servers</div>
+                        <button class="btn btn-primary" onclick="loadCompare()"><i class="fas fa-balance-scale"></i> Compare Selected</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="comparePicker" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <div id="compareResult" style="overflow-x: auto;"><span style="color: #737373; font-size: 0.875rem;">Select 2+ servers above and click Compare.</span></div>
+                    </div>
                 </div>
             </div>
 
@@ -648,6 +670,33 @@
                     <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Focus search</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">/</kbd></div>
                     <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Shortcuts help</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">?</kbd></div>
                     <div style="display:flex;justify-content:space-between;"><span style="color:#a3a3a3;">Close modal</span><kbd style="background:#1f1f1f;border:1px solid #333;border-radius:4px;padding:0.125rem 0.5rem;">Esc</kbd></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="serverDetailModal" class="modal" onclick="if(event.target===this)closeServerDetail()">
+        <div class="modal-content" style="max-width: 780px;">
+            <div class="modal-header">
+                <div style="font-size: 1rem; font-weight: 600; color: #e5e5e5;" id="detailTitle">Server</div>
+                <button class="modal-close" onclick="closeServerDetail()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 0.375rem; margin-bottom: 1rem; border-bottom: 1px solid #1f1f1f;">
+                    <button class="nav-item active" style="width: auto; margin: 0 0.25rem 0.5rem; padding: 0.5rem 0.875rem;" onclick="switchDetailTab('info', event)"><i class="fas fa-info-circle"></i> Info</button>
+                    <button class="nav-item" style="width: auto; margin: 0 0.25rem 0.5rem; padding: 0.5rem 0.875rem;" onclick="switchDetailTab('uptime', event)"><i class="fas fa-chart-line"></i> Uptime</button>
+                    <button class="nav-item" style="width: auto; margin: 0 0.25rem 0.5rem; padding: 0.5rem 0.875rem;" onclick="switchDetailTab('heatmap', event)"><i class="fas fa-th"></i> 30-Day</button>
+                    <button class="nav-item" style="width: auto; margin: 0 0.25rem 0.5rem; padding: 0.5rem 0.875rem;" onclick="switchDetailTab('notes', event)"><i class="fas fa-sticky-note"></i> Notes</button>
+                </div>
+                <div id="detail-info" class="detail-tab"></div>
+                <div id="detail-uptime" class="detail-tab" style="display:none;"><canvas id="detailUptimeChart" height="160"></canvas><div id="detailUptimeInfo" style="color:#737373;font-size:0.8125rem;margin-top:0.5rem;"></div></div>
+                <div id="detail-heatmap" class="detail-tab" style="display:none;"><div id="detailHeatmap" style="display:flex;gap:3px;flex-wrap:wrap;"></div><div id="detailHeatmapInfo" style="color:#737373;font-size:0.75rem;margin-top:0.75rem;"></div></div>
+                <div id="detail-notes" class="detail-tab" style="display:none;">
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+                        <input type="text" id="noteInput" class="form-input" style="flex:1;" placeholder="Add a note...">
+                        <button class="btn btn-primary" onclick="addNote()"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <div id="notesList" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
                 </div>
             </div>
         </div>
